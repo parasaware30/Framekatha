@@ -30,7 +30,7 @@ interface ShowcaseVideoSectionProps {
 }
 
 function sanitizeVideoUrl(url?: string, index: number = 0): string {
-  if (!url || url.includes("mixkit.co") || url.includes("localhost")) {
+  if (!url || typeof url !== "string" || !url.trim()) {
     const fallbackReels = [
       "/videos/reel-1.mp4",
       "/videos/reel-2.mp4",
@@ -38,6 +38,22 @@ function sanitizeVideoUrl(url?: string, index: number = 0): string {
       "/videos/flower.mp4"
     ];
     return fallbackReels[index % fallbackReels.length];
+  }
+  return url.trim();
+}
+
+function getYouTubeEmbedUrl(url: string) {
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+  if (match && match[1]) {
+    return `https://www.youtube-nocookie.com/embed/${match[1]}?autoplay=1&mute=1&loop=1&playlist=${match[1]}&playsinline=1&controls=1&rel=0`;
+  }
+  return url;
+}
+
+function getVimeoEmbedUrl(url: string) {
+  const match = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if (match && match[1]) {
+    return `https://player.vimeo.com/video/${match[1]}?autoplay=1&muted=1&loop=1&background=1`;
   }
   return url;
 }
@@ -284,23 +300,41 @@ export function ShowcaseVideoSection({
       {/* Main Video Stage (Compact Size) */}
       <div className="glass-strong rounded-3xl p-3 sm:p-4 border border-blue-500/30 shadow-[0_0_40px_rgba(59,130,246,0.15)] relative overflow-hidden group">
         <div className="relative aspect-video max-h-[380px] sm:max-h-[440px] rounded-2xl overflow-hidden bg-black shadow-2xl mx-auto">
-          <video
-            ref={videoRef}
-            src={activeVideo.url}
-            autoPlay
-            loop
-            muted={isMuted}
-            playsInline
-            preload="auto"
-            onEnded={() => {
-              const v = videoRef.current;
-              if (v) {
-                v.currentTime = 0;
-                v.play().catch(() => {});
-              }
-            }}
-            className="w-full h-full object-cover"
-          />
+          {activeVideo.url.includes("youtube.com") || activeVideo.url.includes("youtu.be") ? (
+            <iframe
+              src={getYouTubeEmbedUrl(activeVideo.url)}
+              title={activeVideo.title || "Showcase Reel"}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              className="w-full h-full border-0 pointer-events-auto"
+            />
+          ) : activeVideo.url.includes("vimeo.com") ? (
+            <iframe
+              src={getVimeoEmbedUrl(activeVideo.url)}
+              title={activeVideo.title || "Showcase Reel"}
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowFullScreen
+              className="w-full h-full border-0 pointer-events-auto"
+            />
+          ) : (
+            <video
+              ref={videoRef}
+              src={activeVideo.url}
+              autoPlay
+              loop
+              muted={isMuted}
+              playsInline
+              preload="auto"
+              onEnded={() => {
+                const v = videoRef.current;
+                if (v) {
+                  v.currentTime = 0;
+                  v.play().catch(() => {});
+                }
+              }}
+              className="w-full h-full object-cover"
+            />
+          )}
 
           {/* Floating Live Badge */}
           <div className="absolute top-3 left-3 z-20 pointer-events-none flex items-center gap-2">

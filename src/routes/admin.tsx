@@ -450,6 +450,24 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     tag: string;
   } | null>(null);
 
+  const autoSaveVideoSettings = async (updatedVideos: any[], extra: any = {}) => {
+    const newForm = {
+      ...settingsForm,
+      showcaseVideos: updatedVideos,
+      showcaseVideoEnabled: true,
+      ...extra
+    };
+    setSettingsForm(newForm);
+    try {
+      const saved = await updateSiteSettings(newForm);
+      setSiteSettings(saved);
+      setSettingsSavedSuccess(true);
+      setTimeout(() => setSettingsSavedSuccess(false), 3000);
+    } catch (e) {
+      console.error("Auto-save video settings error:", e);
+    }
+  };
+
   const handleStartEditVideo = (index: number) => {
     const v = (settingsForm.showcaseVideos || [])[index];
     if (!v) return;
@@ -463,7 +481,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     });
   };
 
-  const handleSaveEditedVideo = () => {
+  const handleSaveEditedVideo = async () => {
     if (editingVideoIndex === null || !editingVideoForm) return;
     if (!editingVideoForm.url.trim()) {
       alert("Please enter a Video URL or upload a video file.");
@@ -477,10 +495,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
       subtitle: editingVideoForm.subtitle.trim() || "4K Production",
       tag: editingVideoForm.tag.trim() || "Showreel"
     };
-    setSettingsForm((prev) => ({
-      ...prev,
-      showcaseVideos: updatedList
-    }));
+    await autoSaveVideoSettings(updatedList);
     setEditingVideoIndex(null);
     setEditingVideoForm(null);
   };
@@ -490,7 +505,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     setEditingVideoForm(null);
   };
 
-  const handleAddVideoToReel = () => {
+  const handleAddVideoToReel = async () => {
     if (!newVideoUrl.trim()) {
       alert("Please enter a Video URL or upload a video file.");
       return;
@@ -502,52 +517,44 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
       subtitle: newVideoSubtitle.trim() || "4K Production",
       tag: newVideoTag.trim() || "Cinematic"
     };
-    setSettingsForm((prev) => ({
-      ...prev,
-      showcaseVideos: [...(prev.showcaseVideos || []), newVideo],
-      showcaseVideoEnabled: true
-    }));
+    const list = [...(settingsForm.showcaseVideos || []), newVideo];
+    await autoSaveVideoSettings(list);
     setNewVideoUrl("");
     setNewVideoTitle("");
     setNewVideoSubtitle("");
     setNewVideoTag("");
   };
 
-  const handleRemoveVideoFromReel = (index: number) => {
-    setSettingsForm((prev) => ({
-      ...prev,
-      showcaseVideos: (prev.showcaseVideos || []).filter((_, i) => i !== index)
-    }));
+  const handleRemoveVideoFromReel = async (index: number) => {
+    const updatedList = (settingsForm.showcaseVideos || []).filter((_, i) => i !== index);
+    await autoSaveVideoSettings(updatedList);
     if (editingVideoIndex === index) {
       setEditingVideoIndex(null);
       setEditingVideoForm(null);
     }
   };
 
-  const handleMoveVideoReel = (index: number, direction: -1 | 1) => {
+  const handleMoveVideoReel = async (index: number, direction: -1 | 1) => {
     const list = [...(settingsForm.showcaseVideos || [])];
     const targetIndex = index + direction;
     if (targetIndex < 0 || targetIndex >= list.length) return;
     const temp = list[index];
     list[index] = list[targetIndex];
     list[targetIndex] = temp;
-    setSettingsForm((prev) => ({ ...prev, showcaseVideos: list }));
+    await autoSaveVideoSettings(list);
     if (editingVideoIndex !== null) {
       setEditingVideoIndex(null);
       setEditingVideoForm(null);
     }
   };
 
-  const handleAddPresetVideoToReel = (preset: { url: string; title: string; subtitle: string; tag: string }) => {
+  const handleAddPresetVideoToReel = async (preset: { url: string; title: string; subtitle: string; tag: string }) => {
     const newVideo = {
       id: "vid-" + Date.now(),
       ...preset
     };
-    setSettingsForm((prev) => ({
-      ...prev,
-      showcaseVideos: [...(prev.showcaseVideos || []), newVideo],
-      showcaseVideoEnabled: true
-    }));
+    const list = [...(settingsForm.showcaseVideos || []), newVideo];
+    await autoSaveVideoSettings(list);
   };
 
   useEffect(() => {
