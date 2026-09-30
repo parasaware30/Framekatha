@@ -216,12 +216,12 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
 
   // Data states
   const [analytics, setAnalytics] = useState<any>(null);
-  const [projects, setProjects] = useState<any[]>([]);
-  const [clientGalleries, setClientGalleries] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
-  const [testimonials, setTestimonials] = useState<any[]>([]);
+  const [projects, setProjects] = useState<any[]>(DEFAULT_PROJECTS);
+  const [clientGalleries, setClientGalleries] = useState<any[]>(DEFAULT_CLIENT_GALLERIES);
+  const [categories, setCategories] = useState<any[]>(DEFAULT_CATEGORIES);
+  const [testimonials, setTestimonials] = useState<any[]>(DEFAULT_TESTIMONIALS);
   const [messages, setMessages] = useState<any[]>([]);
-  const [siteSettings, setSiteSettings] = useState<any>(null);
+  const [siteSettings, setSiteSettings] = useState<any>(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(true);
 
   // Client Galleries Form State
@@ -1159,12 +1159,14 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                         <span className="text-[9px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-mono">Compulsory</span>
                       </label>
                       <select
-                        value={formData.category}
+                        value={formData.category || "Photography"}
                         onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#12121a] border border-cyan-500/40 text-white text-xs focus:border-cyan-300 focus:outline-none focus:ring-1 focus:ring-cyan-300/30"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-cyan-500/40 text-white text-xs focus:border-cyan-300 focus:outline-none focus:ring-1 focus:ring-cyan-300/30 font-medium cursor-pointer"
                       >
-                        {categories.map((c) => (
-                          <option key={c.id} value={c.name}>{c.name}</option>
+                        {(categories && categories.length > 0 ? categories : DEFAULT_CATEGORIES).map((c) => (
+                          <option key={c.id || c.name} value={c.name} className="bg-slate-900 text-white py-1">
+                            {c.name}
+                          </option>
                         ))}
                       </select>
                       <span className="text-[11px] text-slate-400 block">
