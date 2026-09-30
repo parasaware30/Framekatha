@@ -357,6 +357,22 @@ export const DEFAULT_CLIENT_GALLERIES: any[] = [
   }
 ];
 
+// ── SAFE API CLIENT (Guards against static host HTML fallback responses) ──
+
+async function safeApiFetch<T = any>(url: string, options?: RequestInit): Promise<T | null> {
+  try {
+    const res = await fetch(url, options);
+    if (!res.ok) return null;
+    const ct = res.headers.get('content-type') || '';
+    if (!ct.includes('application/json')) {
+      return null;
+    }
+    return (await res.json()) as T;
+  } catch {
+    return null;
+  }
+}
+
 // ── PERSISTENT DELETION BLACKLIST & LOCALSTORAGE HELPERS ────────────────────
 
 function getDeletedSet(key: string): Set<string> {
@@ -419,29 +435,19 @@ export async function fetchProjects(params?: {
   sort_by?: string;
 }) {
   const deletedSet = getDeletedSet('projects');
-  try {
-    const query = new URLSearchParams();
-    if (params?.category && params.category !== 'All') query.append('category', params.category);
-    if (params?.tag) query.append('tag', params.tag);
-    if (params?.year) query.append('year', params.year.toString());
-    if (params?.featured !== undefined) query.append('featured', params.featured.toString());
-    if (params?.search) query.append('search', params.search);
-    if (params?.sort_by) query.append('sort_by', params.sort_by);
+  const query = new URLSearchParams();
+  if (params?.category && params.category !== 'All') query.append('category', params.category);
+  if (params?.tag) query.append('tag', params.tag);
+  if (params?.year) query.append('year', params.year.toString());
+  if (params?.featured !== undefined) query.append('featured', params.featured.toString());
+  if (params?.search) query.append('search', params.search);
+  if (params?.sort_by) query.append('sort_by', params.sort_by);
 
-    const res = await fetch(`${API_BASE_URL}/projects?${query.toString()}`);
-    if (res.ok) {
-      const ct = res.headers.get('content-type') || '';
-      if (ct.includes('application/json')) {
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-          return data
-            .filter((p: any) => !deletedSet.has(p.id) && !deletedSet.has(p.slug))
-            .map(cleanProjectData);
-        }
-      }
-    }
-  } catch {
-    // Backend offline / static host fallback
+  const data = await safeApiFetch<any[]>(`${API_BASE_URL}/projects?${query.toString()}`);
+  if (Array.isArray(data) && data.length > 0) {
+    return data
+      .filter((p: any) => !deletedSet.has(p.id) && !deletedSet.has(p.slug))
+      .map(cleanProjectData);
   }
 
   // Fallback
@@ -465,35 +471,19 @@ export async function fetchProjects(params?: {
 
 export async function fetchAllProjectsCMS() {
   const deletedSet = getDeletedSet('projects');
-  try {
-    const res = await fetch(`${API_BASE_URL}/projects/all-cms`);
-    if (res.ok) {
-      const ct = res.headers.get('content-type') || '';
-      if (ct.includes('application/json')) {
-        const data = await res.json();
-        if (Array.isArray(data)) {
-          return data
-            .filter((p: any) => !deletedSet.has(p.id) && !deletedSet.has(p.slug))
-            .map(cleanProjectData);
-        }
-      }
-    }
-  } catch {
-    // fallback
+  const data = await safeApiFetch<any[]>(`${API_BASE_URL}/projects/all-cms`);
+  if (Array.isArray(data) && data.length > 0) {
+    return data
+      .filter((p: any) => !deletedSet.has(p.id) && !deletedSet.has(p.slug))
+      .map(cleanProjectData);
   }
   return getLocalStore('projects', DEFAULT_PROJECTS).map(cleanProjectData);
 }
 
 export async function fetchProjectBySlug(slug: string) {
-  try {
-    const res = await fetch(`${API_BASE_URL}/projects/${slug}`);
-    if (res.ok) {
-      const data = await res.json();
-      return cleanProjectData(data);
-    }
-  } catch {
-    // fallback
-  }
+  const data = await safeApiFetch<any>(`${API_BASE_URL}/projects/${slug}`);
+  if (data) return cleanProjectData(data);
+
   const all = getLocalStore('projects', DEFAULT_PROJECTS);
   const found = all.find((p: any) => p.slug === slug || p.id === slug);
   if (!found) {
@@ -508,26 +498,21 @@ export async function incrementProjectViews(projectId: string) {
   if (localStorage.getItem(storageKey)) return;
   localStorage.setItem(storageKey, "1");
 
-  try {
-    await fetch(`${API_BASE_URL}/projects/${projectId}/views`, { method: 'POST' });
-  } catch {
-    // increment locally
-    const all = getLocalStore('projects', DEFAULT_PROJECTS);
-    const proj = all.find((p: any) => p.id === projectId);
-    if (proj) {
-      proj.views = (proj.views || 0) + 1;
-      setLocalStore('projects', all);
-    }
+  await safeApiFetch(`${API_BASE_URL}/projects/${projectId}/views`, { method: 'POST' });
+
+  // Increment locally
+  const all = getLocalStore('projects', DEFAULT_PROJECTS);
+  const proj = all.find((p: any) => p.id === projectId);
+  if (proj) {
+    proj.views = (proj.views || 0) + 1;
+    setLocalStore('projects', all);
   }
 }
 
 export async function toggleProjectLike(projectId: string, action: 'like' | 'unlike' = 'like') {
-  try {
-    const res = await fetch(`${API_BASE_URL}/projects/${projectId}/like?action=${action}`, { method: 'POST' });
-    if (res.ok) return res.json();
-  } catch {
-    // local fallback
-  }
+  const data = await safeApiFetch(`${API_BASE_URL}/projects/${projectId}/like?action=${action}`, { method: 'POST' });
+  if (data) return data;
+
   const all = getLocalStore('projects', DEFAULT_PROJECTS);
   const proj = all.find((p: any) => p.id === projectId);
   if (proj) {
@@ -539,26 +524,19 @@ export async function toggleProjectLike(projectId: string, action: 'like' | 'unl
 }
 
 export async function fetchProjectComments(projectId: string) {
-  try {
-    const res = await fetch(`${API_BASE_URL}/projects/${projectId}/comments`);
-    if (res.ok) return res.json();
-  } catch {
-    // fallback
-  }
+  const data = await safeApiFetch(`${API_BASE_URL}/projects/${projectId}/comments`);
+  if (data) return data;
   return getLocalStore(`comments_${projectId}`, []);
 }
 
 export async function addProjectComment(projectId: string, data: { name?: string; comment: string }) {
-  try {
-    const res = await fetch(`${API_BASE_URL}/projects/${projectId}/comments`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (res.ok) return res.json();
-  } catch {
-    // fallback
-  }
+  const backendResult = await safeApiFetch(`${API_BASE_URL}/projects/${projectId}/comments`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (backendResult) return backendResult;
+
   const existing = getLocalStore(`comments_${projectId}`, []);
   const newComment = {
     id: `com-${Date.now()}`,
@@ -572,31 +550,24 @@ export async function addProjectComment(projectId: string, data: { name?: string
 }
 
 export async function deleteProjectComment(projectId: string, commentId: string) {
-  try {
-    await fetch(`${API_BASE_URL}/projects/${projectId}/comments/${commentId}`, { method: 'DELETE' });
-  } catch {
-    // fallback
-  }
+  await safeApiFetch(`${API_BASE_URL}/projects/${projectId}/comments/${commentId}`, { method: 'DELETE' });
   const existing = getLocalStore(`comments_${projectId}`, []);
   setLocalStore(`comments_${projectId}`, existing.filter((c: any) => c.id !== commentId));
   return { success: true };
 }
 
 export async function createProject(data: any) {
-  try {
-    const res = await fetch(`${API_BASE_URL}/projects`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (res.ok) return res.json();
-  } catch {
-    // fallback
-  }
+  const backendResult = await safeApiFetch(`${API_BASE_URL}/projects`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (backendResult) return backendResult;
+
   const all = getLocalStore('projects', DEFAULT_PROJECTS);
   const newProj = {
     ...data,
-    id: `proj-${Date.now().toString(36)}`,
+    id: data.id || `proj-${Date.now().toString(36)}`,
     views: 0,
     likes: 0,
     comments: [],
@@ -609,18 +580,15 @@ export async function createProject(data: any) {
 }
 
 export async function updateProject(id: string, data: any) {
-  try {
-    const res = await fetch(`${API_BASE_URL}/projects/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (res.ok) return res.json();
-  } catch {
-    // fallback
-  }
+  const backendResult = await safeApiFetch(`${API_BASE_URL}/projects/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (backendResult) return backendResult;
+
   const all = getLocalStore('projects', DEFAULT_PROJECTS);
-  const idx = all.findIndex((p: any) => p.id === id);
+  const idx = all.findIndex((p: any) => p.id === id || p.slug === id);
   if (idx !== -1) {
     all[idx] = { ...all[idx], ...data, updatedAt: new Date().toISOString() };
     setLocalStore('projects', all);
@@ -631,11 +599,8 @@ export async function updateProject(id: string, data: any) {
 
 export async function deleteProject(id: string) {
   markAsDeleted('projects', id);
-  try {
-    await fetch(`${API_BASE_URL}/projects/${id}`, { method: 'DELETE' });
-  } catch {
-    // fallback
-  }
+  await safeApiFetch(`${API_BASE_URL}/projects/${id}`, { method: 'DELETE' });
+
   const all = getLocalStore('projects', DEFAULT_PROJECTS);
   setLocalStore('projects', all.filter((p: any) => p.id !== id && p.slug !== id));
   return { success: true };
@@ -645,34 +610,21 @@ export async function deleteProject(id: string) {
 
 export async function fetchCategories() {
   const deletedSet = getDeletedSet('categories');
-  try {
-    const res = await fetch(`${API_BASE_URL}/categories`);
-    if (res.ok) {
-      const ct = res.headers.get('content-type') || '';
-      if (ct.includes('application/json')) {
-        const data = await res.json();
-        if (Array.isArray(data)) {
-          return data.filter((c: any) => !deletedSet.has(c.id) && !deletedSet.has(c.slug));
-        }
-      }
-    }
-  } catch {
-    // fallback
+  const data = await safeApiFetch<any[]>(`${API_BASE_URL}/categories`);
+  if (Array.isArray(data) && data.length > 0) {
+    return data.filter((c: any) => !deletedSet.has(c.id) && !deletedSet.has(c.slug));
   }
   return getLocalStore('categories', DEFAULT_CATEGORIES);
 }
 
 export async function createCategory(data: any) {
-  try {
-    const res = await fetch(`${API_BASE_URL}/categories`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (res.ok) return res.json();
-  } catch {
-    // fallback
-  }
+  const backendResult = await safeApiFetch(`${API_BASE_URL}/categories`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (backendResult) return backendResult;
+
   const all = getLocalStore('categories', DEFAULT_CATEGORIES);
   const newCat = { ...data, id: `cat-${Date.now().toString(36)}`, count: 0 };
   all.push(newCat);
@@ -681,18 +633,15 @@ export async function createCategory(data: any) {
 }
 
 export async function updateCategory(id: string, data: any) {
-  try {
-    const res = await fetch(`${API_BASE_URL}/categories/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (res.ok) return res.json();
-  } catch {
-    // fallback
-  }
+  const backendResult = await safeApiFetch(`${API_BASE_URL}/categories/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (backendResult) return backendResult;
+
   const all = getLocalStore('categories', DEFAULT_CATEGORIES);
-  const idx = all.findIndex((c: any) => c.id === id);
+  const idx = all.findIndex((c: any) => c.id === id || c.slug === id);
   if (idx !== -1) {
     all[idx] = { ...all[idx], ...data };
     setLocalStore('categories', all);
@@ -703,11 +652,8 @@ export async function updateCategory(id: string, data: any) {
 
 export async function deleteCategory(id: string) {
   markAsDeleted('categories', id);
-  try {
-    await fetch(`${API_BASE_URL}/categories/${id}`, { method: 'DELETE' });
-  } catch {
-    // fallback
-  }
+  await safeApiFetch(`${API_BASE_URL}/categories/${id}`, { method: 'DELETE' });
+
   const all = getLocalStore('categories', DEFAULT_CATEGORIES);
   setLocalStore('categories', all.filter((c: any) => c.id !== id && c.slug !== id));
   return { success: true };
@@ -717,34 +663,21 @@ export async function deleteCategory(id: string) {
 
 export async function fetchTestimonials() {
   const deletedSet = getDeletedSet('testimonials');
-  try {
-    const res = await fetch(`${API_BASE_URL}/testimonials`);
-    if (res.ok) {
-      const ct = res.headers.get('content-type') || '';
-      if (ct.includes('application/json')) {
-        const data = await res.json();
-        if (Array.isArray(data)) {
-          return data.filter((t: any) => !deletedSet.has(t.id));
-        }
-      }
-    }
-  } catch {
-    // fallback
+  const data = await safeApiFetch<any[]>(`${API_BASE_URL}/testimonials`);
+  if (Array.isArray(data) && data.length > 0) {
+    return data.filter((t: any) => !deletedSet.has(t.id));
   }
   return getLocalStore('testimonials', DEFAULT_TESTIMONIALS);
 }
 
 export async function createTestimonial(data: any) {
-  try {
-    const res = await fetch(`${API_BASE_URL}/testimonials`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (res.ok) return res.json();
-  } catch {
-    // fallback
-  }
+  const backendResult = await safeApiFetch(`${API_BASE_URL}/testimonials`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (backendResult) return backendResult;
+
   const all = getLocalStore('testimonials', DEFAULT_TESTIMONIALS);
   const newTest = { ...data, id: `test-${Date.now().toString(36)}` };
   all.push(newTest);
@@ -754,11 +687,8 @@ export async function createTestimonial(data: any) {
 
 export async function deleteTestimonial(id: string) {
   markAsDeleted('testimonials', id);
-  try {
-    await fetch(`${API_BASE_URL}/testimonials/${id}`, { method: 'DELETE' });
-  } catch {
-    // fallback
-  }
+  await safeApiFetch(`${API_BASE_URL}/testimonials/${id}`, { method: 'DELETE' });
+
   const all = getLocalStore('testimonials', DEFAULT_TESTIMONIALS);
   setLocalStore('testimonials', all.filter((t: any) => t.id !== id));
   return { success: true };
@@ -767,26 +697,19 @@ export async function deleteTestimonial(id: string) {
 // ── MESSAGES (CONTACT FORM) ────────────────────────────────────────────────
 
 export async function fetchMessages() {
-  try {
-    const res = await fetch(`${API_BASE_URL}/messages`);
-    if (res.ok) return res.json();
-  } catch {
-    // fallback
-  }
+  const data = await safeApiFetch<any[]>(`${API_BASE_URL}/messages`);
+  if (Array.isArray(data)) return data;
   return getLocalStore('messages', []);
 }
 
 export async function sendMessage(data: any) {
-  try {
-    const res = await fetch(`${API_BASE_URL}/messages`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (res.ok) return res.json();
-  } catch {
-    // fallback
-  }
+  const backendResult = await safeApiFetch(`${API_BASE_URL}/messages`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (backendResult) return backendResult;
+
   const all = getLocalStore('messages', []);
   const newMsg = {
     ...data,
@@ -799,11 +722,7 @@ export async function sendMessage(data: any) {
 }
 
 export async function deleteMessage(id: string) {
-  try {
-    await fetch(`${API_BASE_URL}/messages/${id}`, { method: 'DELETE' });
-  } catch {
-    // fallback
-  }
+  await safeApiFetch(`${API_BASE_URL}/messages/${id}`, { method: 'DELETE' });
   const all = getLocalStore('messages', []);
   setLocalStore('messages', all.filter((m: any) => m.id !== id));
   return { success: true };
@@ -812,15 +731,9 @@ export async function deleteMessage(id: string) {
 // ── ANALYTICS ──────────────────────────────────────────────────────────────
 
 export async function fetchAnalytics() {
-  try {
-    const res = await fetch(`${API_BASE_URL}/analytics`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.overview) return data;
-    }
-  } catch {
-    // fallback
-  }
+  const data = await safeApiFetch<any>(`${API_BASE_URL}/analytics`);
+  if (data && data.overview) return data;
+
   const projects = getLocalStore('projects', DEFAULT_PROJECTS);
   const categories = getLocalStore('categories', DEFAULT_CATEGORIES);
   const totalViews = projects.reduce((sum: number, p: any) => sum + (p.views || 0), 0);
@@ -867,29 +780,19 @@ export async function fetchAnalytics() {
 // ── SITE SETTINGS ──────────────────────────────────────────────────────────
 
 export async function fetchSiteSettings() {
-  try {
-    const res = await fetch(`${API_BASE_URL}/settings`);
-    if (res.ok) {
-      const data = await res.json();
-      return data;
-    }
-  } catch {
-    // fallback
-  }
+  const data = await safeApiFetch<any>(`${API_BASE_URL}/settings`);
+  if (data && data.title) return data;
   return getLocalStore('settings', DEFAULT_SETTINGS);
 }
 
 export async function updateSiteSettings(data: any) {
-  try {
-    const res = await fetch(`${API_BASE_URL}/settings`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (res.ok) return res.json();
-  } catch {
-    // fallback
-  }
+  const backendResult = await safeApiFetch(`${API_BASE_URL}/settings`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (backendResult) return backendResult;
+
   setLocalStore('settings', data);
   return data;
 }
@@ -1027,21 +930,17 @@ export async function uploadMultipleFiles(
 // ── CLIENT PROOFING & SECRET GALLERIES ─────────────────────────────────────
 
 export async function fetchClientGalleries(): Promise<any[]> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/client-galleries`);
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        return data.map((g: any) => ({
-          ...g,
-          coverImage: cleanMediaUrl(g.coverImage),
-          images: Array.isArray(g.images) ? g.images.map(cleanMediaUrl) : [],
-          selectedImages: Array.isArray(g.selectedImages) ? g.selectedImages.map(cleanMediaUrl) : []
-        }));
-      }
-    }
-  } catch {
-    // fallback
+  const deletedSet = getDeletedSet('client_galleries');
+  const data = await safeApiFetch<any[]>(`${API_BASE_URL}/client-galleries`);
+  if (Array.isArray(data) && data.length > 0) {
+    return data
+      .filter((g: any) => !deletedSet.has(g.id) && !deletedSet.has(g.slug))
+      .map((g: any) => ({
+        ...g,
+        coverImage: cleanMediaUrl(g.coverImage),
+        images: Array.isArray(g.images) ? g.images.map(cleanMediaUrl) : [],
+        selectedImages: Array.isArray(g.selectedImages) ? g.selectedImages.map(cleanMediaUrl) : []
+      }));
   }
 
   const list = getLocalStore('client_galleries', DEFAULT_CLIENT_GALLERIES);
@@ -1054,20 +953,17 @@ export async function fetchClientGalleries(): Promise<any[]> {
 }
 
 export async function createClientGallery(data: any): Promise<any> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/client-galleries`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (res.ok) return res.json();
-  } catch {
-    // fallback
-  }
+  const backendResult = await safeApiFetch(`${API_BASE_URL}/client-galleries`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (backendResult) return backendResult;
+
   const all = getLocalStore('client_galleries', DEFAULT_CLIENT_GALLERIES);
   const newGal = {
     ...data,
-    id: `cg-${Date.now().toString(36)}`,
+    id: data.id || `cg-${Date.now().toString(36)}`,
     views: 0,
     selectedImages: [],
     clientNotes: "",
@@ -1080,18 +976,15 @@ export async function createClientGallery(data: any): Promise<any> {
 }
 
 export async function updateClientGallery(id: string, data: any): Promise<any> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/client-galleries/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (res.ok) return res.json();
-  } catch {
-    // fallback
-  }
+  const backendResult = await safeApiFetch(`${API_BASE_URL}/client-galleries/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (backendResult) return backendResult;
+
   const all = getLocalStore('client_galleries', DEFAULT_CLIENT_GALLERIES);
-  const idx = all.findIndex((g: any) => g.id === id);
+  const idx = all.findIndex((g: any) => g.id === id || g.slug === id);
   if (idx !== -1) {
     all[idx] = { ...all[idx], ...data, updatedAt: new Date().toISOString() };
     setLocalStore('client_galleries', all);
@@ -1102,26 +995,19 @@ export async function updateClientGallery(id: string, data: any): Promise<any> {
 
 export async function deleteClientGallery(id: string): Promise<any> {
   markAsDeleted('client_galleries', id);
-  try {
-    await fetch(`${API_BASE_URL}/client-galleries/${id}`, { method: 'DELETE' });
-  } catch {
-    // fallback
-  }
+  await safeApiFetch(`${API_BASE_URL}/client-galleries/${id}`, { method: 'DELETE' });
+
   const all = getLocalStore('client_galleries', DEFAULT_CLIENT_GALLERIES);
   setLocalStore('client_galleries', all.filter((g: any) => g.id !== id && g.slug !== id));
   return { success: true };
 }
 
 export async function fetchGalleryPublicMeta(slug: string): Promise<any> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/client-galleries/info/${slug}`);
-    if (res.ok) {
-      const data = await res.json();
-      return { ...data, coverImage: cleanMediaUrl(data.coverImage) };
-    }
-  } catch {
-    // fallback
+  const data = await safeApiFetch<any>(`${API_BASE_URL}/client-galleries/info/${slug}`);
+  if (data) {
+    return { ...data, coverImage: cleanMediaUrl(data.coverImage) };
   }
+
   const all = getLocalStore('client_galleries', DEFAULT_CLIENT_GALLERIES);
   const found = all.find((g: any) => g.slug === slug || g.id === slug) || all[0];
   return {
@@ -1137,23 +1023,18 @@ export async function fetchGalleryPublicMeta(slug: string): Promise<any> {
 }
 
 export async function verifyClientPasscode(slug: string, passcode: string): Promise<any> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/client-galleries/access/${slug}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ passcode }),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      return {
-        ...data,
-        coverImage: cleanMediaUrl(data.coverImage),
-        images: Array.isArray(data.images) ? data.images.map(cleanMediaUrl) : [],
-        selectedImages: Array.isArray(data.selectedImages) ? data.selectedImages.map(cleanMediaUrl) : []
-      };
-    }
-  } catch {
-    // fallback
+  const data = await safeApiFetch<any>(`${API_BASE_URL}/client-galleries/access/${slug}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ passcode }),
+  });
+  if (data) {
+    return {
+      ...data,
+      coverImage: cleanMediaUrl(data.coverImage),
+      images: Array.isArray(data.images) ? data.images.map(cleanMediaUrl) : [],
+      selectedImages: Array.isArray(data.selectedImages) ? data.selectedImages.map(cleanMediaUrl) : []
+    };
   }
 
   const all = getLocalStore('client_galleries', DEFAULT_CLIENT_GALLERIES);
@@ -1174,16 +1055,11 @@ export async function verifyClientPasscode(slug: string, passcode: string): Prom
 }
 
 export async function toggleClientImageSelect(slug: string, imageUrl: string, selected: boolean): Promise<any> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/client-galleries/${slug}/toggle-select`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ imageUrl, selected }),
-    });
-    if (res.ok) return res.json();
-  } catch {
-    // fallback
-  }
+  await safeApiFetch(`${API_BASE_URL}/client-galleries/${slug}/toggle-select`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ imageUrl, selected }),
+  });
 
   const all = getLocalStore('client_galleries', DEFAULT_CLIENT_GALLERIES);
   const found = all.find((g: any) => g.slug === slug || g.id === slug);
@@ -1201,16 +1077,11 @@ export async function toggleClientImageSelect(slug: string, imageUrl: string, se
 }
 
 export async function submitClientFeedback(slug: string, clientNotes: string, selectedImages: string[]): Promise<any> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/client-galleries/${slug}/submit-feedback`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ clientNotes, selectedImages }),
-    });
-    if (res.ok) return res.json();
-  } catch {
-    // fallback
-  }
+  await safeApiFetch(`${API_BASE_URL}/client-galleries/${slug}/submit-feedback`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ clientNotes, selectedImages }),
+  });
 
   const all = getLocalStore('client_galleries', DEFAULT_CLIENT_GALLERIES);
   const found = all.find((g: any) => g.slug === slug || g.id === slug);
