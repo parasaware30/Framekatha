@@ -58,6 +58,8 @@ import {
   Lock,
   LogOut,
   Shield,
+  LayoutGrid,
+  List,
   Globe,
   EyeOff,
   Save,
@@ -212,7 +214,8 @@ export function AdminPage() {
 }
 
 function AdminDashboard({ onLogout }: { onLogout: () => void }) {
-  const [activeTab, setActiveTab] = useState<"analytics" | "projects" | "client-galleries" | "categories" | "testimonials" | "messages" | "settings">("analytics");
+  const [activeTab, setActiveTab] = useState<"projects" | "analytics" | "client-galleries" | "categories" | "testimonials" | "messages" | "settings">("projects");
+  const [projectViewMode, setProjectViewMode] = useState<"grid" | "table">("grid");
 
   // Data states
   const [analytics, setAnalytics] = useState<any>(null);
@@ -838,13 +841,13 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
         {/* Tab Selection Navigation */}
         <div className="flex flex-nowrap sm:flex-wrap items-center gap-2 border-b border-white/10 pb-4 overflow-x-auto no-scrollbar">
           {[
-            { id: "analytics", label: "Analytics & Views", icon: BarChart3 },
-            { id: "projects", label: "Manage Projects", icon: FolderPlus },
-            { id: "client-galleries", label: "Client Proofing & Albums", icon: ShieldCheck },
-            { id: "categories", label: "Categories", icon: Layers },
-            { id: "testimonials", label: "Testimonials", icon: Star },
-            { id: "messages", label: "Contact Messages", icon: MessageSquare },
-            { id: "settings", label: "Site Settings", icon: Settings },
+            { id: "projects", label: `📁 Projects & Albums (${projects.length})`, icon: FolderPlus },
+            { id: "analytics", label: "📊 Analytics & Views", icon: BarChart3 },
+            { id: "client-galleries", label: `🔒 Client Albums (${clientGalleries.length})`, icon: ShieldCheck },
+            { id: "categories", label: `🏷️ Categories (${categories.length})`, icon: Layers },
+            { id: "testimonials", label: `⭐ Reviews (${testimonials.length})`, icon: Star },
+            { id: "messages", label: `💬 Inquiries (${messages.length})`, icon: MessageSquare },
+            { id: "settings", label: "⚙️ Site Settings", icon: Settings },
           ].map((tab) => {
             const Icon = tab.icon;
             return (
@@ -995,15 +998,44 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           <div className="space-y-6 animate-fade-in">
             <div className="flex flex-wrap justify-between items-center gap-4">
               <div>
-                <h2 className="text-xl font-bold font-display text-white">Media Folders & Projects ({projects.length})</h2>
-                <p className="text-xs text-slate-400">Create media albums, upload local PC folders & manage multiple photo collections</p>
+                <h2 className="text-xl font-bold font-display text-white flex items-center gap-2">
+                  <FolderPlus className="size-6 text-cyan-400" />
+                  Media Folders &amp; Projects ({projects.length})
+                </h2>
+                <p className="text-xs text-slate-300">Create media albums, upload local PC folders &amp; manage multiple photo collections</p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
+                {/* View Mode Toggle: Grid Cards vs Table */}
+                <div className="flex items-center rounded-xl bg-white/5 p-1 border border-white/10">
+                  <button
+                    type="button"
+                    onClick={() => setProjectViewMode("grid")}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                      projectViewMode === "grid"
+                        ? "bg-gradient-to-r from-purple-600 to-cyan-500 text-white shadow-sm"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    <LayoutGrid className="size-3.5" /> Visual Cards
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setProjectViewMode("table")}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                      projectViewMode === "table"
+                        ? "bg-gradient-to-r from-purple-600 to-cyan-500 text-white shadow-sm"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    <List className="size-3.5" /> Table List
+                  </button>
+                </div>
+
                 <button
                   onClick={() => { resetForm(); setEditingProjectId(null); setShowAddProject(!showAddProject); }}
                   className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-white font-bold text-xs shadow-lg transition-all flex items-center gap-2 cursor-pointer"
                 >
-                  <FolderPlus className="size-4" /> {showAddProject ? "Close Form" : "Create Folder / Album"}
+                  <Plus className="size-4" /> {showAddProject ? "Close Form" : "+ Create New Project / Album"}
                 </button>
               </div>
             </div>
@@ -1672,78 +1704,83 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
               </form>
             )}
 
-            {/* Projects List Table */}
-            <div className="glass-strong rounded-3xl p-6 border border-white/10 overflow-x-auto">
-              <table className="w-full text-left text-xs text-slate-300">
-                <thead className="border-b border-white/10 text-slate-400 uppercase text-[10px]">
-                  <tr>
-                    <th className="pb-3">Folder Cover</th>
-                    <th className="pb-3">Folder &amp; Title</th>
-                    <th className="pb-3">Category</th>
-                    <th className="pb-3">Media Inside</th>
-                    <th className="pb-3">Uploaded Date</th>
-                    <th className="pb-3">Views</th>
-                    <th className="pb-3">Visibility (Click to Toggle)</th>
-                    <th className="pb-3 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {projects.map((p) => (
-                    <tr key={p.id} className="hover:bg-white/2 transition-colors">
-                      <td className="py-3">
-                        <div className="relative size-12 rounded-xl overflow-hidden bg-slate-900 border border-white/10 shrink-0">
-                          <img src={p.thumbnail} alt={p.title} className="size-full object-cover" />
-                          {p.folderThumbnail && p.folderThumbnail !== p.thumbnail && (
-                            <span className="absolute bottom-0 right-0 p-0.5 bg-purple-600/90 rounded-tl text-[8px] text-white" title="Custom Folder Cover Active">
-                              📁
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-3">
-                        <div className="font-semibold text-white">{p.title}</div>
-                        <div className="flex flex-wrap items-center gap-2 mt-0.5">
+            {/* Projects Content: Grid Mode vs Table Mode */}
+            {projectViewMode === "grid" ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {projects.map((p) => (
+                  <div
+                    key={p.id}
+                    className="glass-strong rounded-3xl overflow-hidden border border-white/10 hover:border-cyan-500/40 transition-all flex flex-col justify-between group shadow-xl bg-slate-900/60"
+                  >
+                    {/* Top Thumbnail Section */}
+                    <div className="relative aspect-video w-full overflow-hidden bg-slate-950">
+                      <img
+                        src={p.thumbnail || "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800"}
+                        alt={p.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-black/60" />
+
+                      {/* Top Badges */}
+                      <div className="absolute top-3 left-3 right-3 flex justify-between items-center gap-2">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="px-2.5 py-0.5 rounded-full bg-cyan-950/80 backdrop-blur-md text-[10px] font-bold text-cyan-300 border border-cyan-500/40">
+                            {p.category}
+                          </span>
                           {p.folderName && (
-                            <span className="text-[10px] text-purple-400 flex items-center gap-1 font-mono">
-                              <Folder className="size-2.5" /> {p.folderName}
-                            </span>
-                          )}
-                          {p.photoTitle && (
-                            <span className="text-[10px] text-cyan-400 flex items-center gap-1 font-mono">
-                              <Camera className="size-2.5" /> {p.photoTitle}
+                            <span className="px-2.5 py-0.5 rounded-full bg-purple-950/85 backdrop-blur-md text-[10px] font-semibold text-purple-200 border border-purple-500/40 flex items-center gap-1">
+                              <Folder className="size-2.5 text-purple-400" />
+                              <span className="truncate max-w-[100px]">{p.folderName}</span>
                             </span>
                           )}
                         </div>
-                      </td>
-                      <td className="py-3 text-cyan-400">{p.category}</td>
-                      <td className="py-3">
-                        <span className="px-2 py-0.5 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 font-mono text-[11px]">
-                          📁 {p.images?.length || 0} Photos {p.video ? "+ 🎥" : ""}
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span className="px-2 py-0.5 rounded-full bg-black/80 backdrop-blur-md text-[10px] font-mono text-cyan-300 border border-cyan-500/30">
+                            📁 {p.images?.length || 1} {p.video ? "+ 🎥" : ""}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Bottom Image Stats */}
+                      <div className="absolute bottom-2 left-3 right-3 flex justify-between items-center text-[10px] text-slate-300">
+                        <span className="flex items-center gap-1 text-cyan-300 font-mono">
+                          <Eye className="size-3" /> {p.views || 0} Views
                         </span>
-                      </td>
-                      <td className="py-3 text-slate-400 font-mono text-[11px]">
-                        {p.createdAt
-                          ? new Date(p.createdAt).toLocaleDateString("en-GB", {
-                              day: "2-digit",
-                              month: "short",
-                              year: "numeric"
-                            })
-                          : "2026"}
-                      </td>
-                      <td className="py-3 font-mono">{p.views}</td>
-                      <td className="py-3">
-                        <div className="flex flex-col gap-1 items-start">
+                        <span className="font-mono text-slate-400">
+                          {p.year || 2026} • {p.location || "Studio"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Card Body Details */}
+                    <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                      <div className="space-y-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <h3 className="font-bold text-white text-base group-hover:text-cyan-300 transition-colors line-clamp-1">
+                              {p.title}
+                            </h3>
+                            {p.photoTitle && p.photoTitle !== p.title && (
+                              <p className="text-xs text-cyan-400/90 font-medium flex items-center gap-1 mt-0.5">
+                                <Camera className="size-3 text-cyan-400 shrink-0" />
+                                <span className="truncate">{p.photoTitle}</span>
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Public / Private Badge */}
                           <button
                             type="button"
                             onClick={() => handleTogglePublish(p)}
                             title={
                               p.published !== false
-                                ? "Click to make Private (hide from public visitors)"
-                                : "Click to make Public (publish to public portfolio)"
+                                ? "Click to make Private"
+                                : "Click to make Public"
                             }
-                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 transition-all cursor-pointer border ${
+                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 transition-all cursor-pointer border shrink-0 ${
                               p.published !== false
-                                ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25 shadow-[0_0_8px_rgba(16,185,129,0.2)]"
+                                ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25 shadow-sm"
                                 : "bg-amber-500/15 border-amber-500/30 text-amber-400 hover:bg-amber-500/25"
                             }`}
                           >
@@ -1753,30 +1790,171 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                               </>
                             ) : (
                               <>
-                                <EyeOff className="size-3" /> Private (Draft)
+                                <EyeOff className="size-3" /> Private
                               </>
                             )}
                           </button>
-                          {p.featured && (
-                            <span className="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[9px] font-bold border border-purple-500/30">
-                              Featured
-                            </span>
-                          )}
                         </div>
-                      </td>
-                      <td className="py-3 text-right space-x-2">
-                        <button onClick={() => handleEditClick(p)} className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-cyan-400">
-                          <Edit className="size-4" />
-                        </button>
-                        <button onClick={() => handleDeleteProject(p.id)} className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400">
-                          <Trash2 className="size-4" />
-                        </button>
-                      </td>
+
+                        <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                          {p.description || "No description provided."}
+                        </p>
+
+                        {/* Tags */}
+                        {p.tags && p.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 pt-1">
+                            {p.tags.slice(0, 3).map((t: string) => (
+                              <span key={t} className="text-[10px] px-2 py-0.5 rounded-md bg-white/5 text-slate-300">
+                                #{t}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Card Bottom Action Bar: Edit, Delete, View Live */}
+                      <div className="pt-4 border-t border-white/10 flex items-center justify-between gap-2">
+                        <a
+                          href={`/portfolio/${p.slug}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all border border-white/10"
+                          title="Open live portfolio page in new tab"
+                        >
+                          <Eye className="size-3.5 text-cyan-400" />
+                          <span>Live View</span>
+                        </a>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleEditClick(p)}
+                            className="px-3.5 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm hover:scale-105"
+                          >
+                            <Edit className="size-3.5" />
+                            <span>Edit</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteProject(p.id)}
+                            className="p-1.5 rounded-xl bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/30 transition-all cursor-pointer hover:scale-105"
+                            title="Delete this project"
+                          >
+                            <Trash2 className="size-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              /* Projects List Table */
+              <div className="glass-strong rounded-3xl p-6 border border-white/10 overflow-x-auto">
+                <table className="w-full text-left text-xs text-slate-300">
+                  <thead className="border-b border-white/10 text-slate-400 uppercase text-[10px]">
+                    <tr>
+                      <th className="pb-3">Folder Cover</th>
+                      <th className="pb-3">Folder &amp; Title</th>
+                      <th className="pb-3">Category</th>
+                      <th className="pb-3">Media Inside</th>
+                      <th className="pb-3">Uploaded Date</th>
+                      <th className="pb-3">Views</th>
+                      <th className="pb-3">Visibility</th>
+                      <th className="pb-3 text-right">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {projects.map((p) => (
+                      <tr key={p.id} className="hover:bg-white/2 transition-colors">
+                        <td className="py-3">
+                          <div className="relative size-12 rounded-xl overflow-hidden bg-slate-900 border border-white/10 shrink-0">
+                            <img src={p.thumbnail} alt={p.title} className="size-full object-cover" />
+                            {p.folderThumbnail && p.folderThumbnail !== p.thumbnail && (
+                              <span className="absolute bottom-0 right-0 p-0.5 bg-purple-600/90 rounded-tl text-[8px] text-white" title="Custom Folder Cover Active">
+                                📁
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-3">
+                          <div className="font-semibold text-white">{p.title}</div>
+                          <div className="flex flex-wrap items-center gap-2 mt-0.5">
+                            {p.folderName && (
+                              <span className="text-[10px] text-purple-400 flex items-center gap-1 font-mono">
+                                <Folder className="size-2.5" /> {p.folderName}
+                              </span>
+                            )}
+                            {p.photoTitle && (
+                              <span className="text-[10px] text-cyan-400 flex items-center gap-1 font-mono">
+                                <Camera className="size-2.5" /> {p.photoTitle}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-3 text-cyan-400">{p.category}</td>
+                        <td className="py-3">
+                          <span className="px-2 py-0.5 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 font-mono text-[11px]">
+                            📁 {p.images?.length || 0} Photos {p.video ? "+ 🎥" : ""}
+                          </span>
+                        </td>
+                        <td className="py-3 text-slate-400 font-mono text-[11px]">
+                          {p.createdAt
+                            ? new Date(p.createdAt).toLocaleDateString("en-GB", {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric"
+                              })
+                            : "2026"}
+                        </td>
+                        <td className="py-3 font-mono">{p.views}</td>
+                        <td className="py-3">
+                          <div className="flex flex-col gap-1 items-start">
+                            <button
+                              type="button"
+                              onClick={() => handleTogglePublish(p)}
+                              title={
+                                p.published !== false
+                                  ? "Click to make Private"
+                                  : "Click to make Public"
+                              }
+                              className={`px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 transition-all cursor-pointer border ${
+                                p.published !== false
+                                  ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25 shadow-sm"
+                                  : "bg-amber-500/15 border-amber-500/30 text-amber-400 hover:bg-amber-500/25"
+                              }`}
+                            >
+                              {p.published !== false ? (
+                                <>
+                                  <Globe className="size-3" /> Public
+                                </>
+                              ) : (
+                                <>
+                                  <EyeOff className="size-3" /> Private (Draft)
+                                </>
+                              )}
+                            </button>
+                            {p.featured && (
+                              <span className="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[9px] font-bold border border-purple-500/30">
+                                Featured
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-3 text-right space-x-2">
+                          <button onClick={() => handleEditClick(p)} className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-cyan-400" title="Edit project">
+                            <Edit className="size-4" />
+                          </button>
+                          <button onClick={() => handleDeleteProject(p.id)} className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400" title="Delete project">
+                            <Trash2 className="size-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
 
