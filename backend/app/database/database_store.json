@@ -1,0 +1,619 @@
+{
+  "projects": [
+    {
+      "title": "Ganpati bappa morya ",
+      "slug": "ganpati-bappa-morya-",
+      "description": "Djudh",
+      "category": "Photography",
+      "subcategory": "Dj",
+      "folderName": "Ganpati bappa morya",
+      "folderThumbnail": "/uploads/c13f84c5b3da44658253b0a3b311031b.png",
+      "photoTitle": "Hshshs",
+      "images": [
+        "/uploads/86e5c3fbbb3544ec92b902a484d9a09d.png"
+      ],
+      "video": "",
+      "thumbnail": "/uploads/c13f84c5b3da44658253b0a3b311031b.png",
+      "tags": [
+        "Jdjd"
+      ],
+      "tools": [
+        "Jdjd"
+      ],
+      "camera": "",
+      "lens": "",
+      "editingSoftware": "",
+      "year": 2026,
+      "location": "Djdjd",
+      "featured": true,
+      "published": true,
+      "beforeImage": "/uploads/a08fbecbcd044e7aac6a9b2906e46434.png",
+      "afterImage": "/uploads/1fe3890f838c404ca4eea48b5b52bc89.png",
+      "showThumbnailInDetail": false,
+      "likes": 0,
+      "comments": [],
+      "id": "proj-3f35dc59",
+      "views": 4,
+      "createdAt": "2026-09-28T19:27:34.711782Z",
+      "updatedAt": "2026-09-28T19:30:33.119889Z"
+    },
+    {
+      "id": "proj-2",
+      "title": "Monsoon Portrait Series",
+      "slug": "monsoon-portrait",
+      "description": "Cinematic outdoor portraiture in heavy rain with high-contrast moody color grading and natural atmospheric reflections.",
+      "category": "Photography",
+      "subcategory": "Portraits",
+      "images": [
+        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=1200",
+        "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=1200"
+      ],
+      "video": "",
+      "thumbnail": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
+      "tags": [
+        "Portrait",
+        "Monsoon",
+        "Moody",
+        "Rain",
+        "Street",
+        "Atmospheric"
+      ],
+      "tools": [
+        "Canon R5",
+        "85mm f/1.2",
+        "Photoshop",
+        "Lightroom"
+      ],
+      "camera": "Canon EOS R5",
+      "lens": "RF 85mm F1.2L USM",
+      "editingSoftware": "Adobe Photoshop & Lightroom",
+      "year": 2026,
+      "location": "Mumbai, Maharashtra",
+      "featured": true,
+      "published": false,
+      "views": 0,
+      "beforeImage": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&sat=-50",
+      "afterImage": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
+      "createdAt": "2026-03-01T12:00:00Z",
+      "updatedAt": "2026-09-28T16:23:15.287413Z"
+    },
+    {
+      "id": "proj-3",
+      "title": "Neon Cyberpunk Visual Retouch",
+      "slug": "neon-cyberpunk-visual-retouch",
+      "description": "Advanced before/after photo editing and color grading turning daytime urban streets into a glowing futuristic cyberpunk metropolis.",
+      "category": "Photo Editing",
+      "subcategory": "Color Grading",
+      "images": [
+        "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=1200"
+      ],
+      "video": "",
+      "thumbnail": "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800",
+      "tags": [
+        "Cyberpunk",
+        "Color Grading",
+        "Neon",
+        "Retouch",
+        "Photoshop",
+        "Urban"
+      ],
+      "tools": [
+        "Adobe Photoshop",
+        "Camera Raw",
+        "Lightroom"
+      ],
+      "camera": "Sony A7S III",
+      "lens": "24-70mm F2.8 GM",
+      "editingSoftware": "Adobe Photoshop 2026",
+      "year": 2026,
+      "location": "Tokyo, Japan",
+      "featured": true,
+      "published": false,
+      "views": 0,
+      "beforeImage": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=800",
+      "afterImage": "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800",
+      "createdAt": "2026-03-12T14:30:00Z",
+      "updatedAt": "2026-09-28T16:23:41.916608Z"
+    },
+    {
+      "id": "proj-4",
+      "title": "Digital Dreams â€” Surreal Concept Art",
+      "slug": "digital-dreams-surreal-concept-art",
+      "description": "Fantasy digital illustration exploring floating cosmic islands, ethereal light leaks, and surreal dimensional shifts.",
+      "category": "Digital Art",
+      "subcategory": "Illustration",
+      "images": [
+        "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1200"
+      ],
+      "video": "",
+      "thumbnail": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800",
+      "tags": [
+        "Surreal",
+        "Digital Painting",
+        "Fantasy",
+        "Cosmic",
+        "Illustration"
+      ],
+      "tools": [
+        "Procreate",
+        "Photoshop",
+        "Wacom Intuos"
+      ],
+      "camera": "",
+      "lens": "",
+      "editingSoftware": "Procreate & Photoshop",
+      "year": 2025,
+      "location": "Studio Production",
+      "featured": true,
+      "published": true,
+      "views": 1,
+      "beforeImage": "",
+      "afterImage": "",
+      "createdAt": "2025-11-20T09:15:00Z",
+      "updatedAt": "2025-11-20T09:15:00Z"
+    },
+    {
+      "id": "proj-5",
+      "title": "Minimalist Film Poster Series",
+      "slug": "minimalist-film-poster-series",
+      "description": "A collection of alternative minimalist movie posters combining bold typography, negative space, and dual-tone vector geometry.",
+      "category": "Poster Design",
+      "subcategory": "Graphic Design",
+      "images": [
+        "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=1200"
+      ],
+      "video": "",
+      "thumbnail": "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=800",
+      "tags": [
+        "Poster",
+        "Minimalism",
+        "Typography",
+        "Branding",
+        "Vector",
+        "Design"
+      ],
+      "tools": [
+        "Adobe Illustrator",
+        "Figma",
+        "Photoshop"
+      ],
+      "camera": "",
+      "lens": "",
+      "editingSoftware": "Adobe Illustrator & Figma",
+      "year": 2026,
+      "location": "Digital Work",
+      "featured": false,
+      "published": true,
+      "views": 2,
+      "beforeImage": "",
+      "afterImage": "",
+      "createdAt": "2026-01-15T11:00:00Z",
+      "updatedAt": "2026-01-15T11:00:00Z"
+    },
+    {
+      "id": "proj-6",
+      "title": "Cinematic YouTube Thumbnail Collection",
+      "slug": "cinematic-youtube-thumbnail-collection",
+      "description": "High CTR thumbnail designs created for tech and filmmaking creators with dynamic glow overlays and sharp subject cutouts.",
+      "category": "Thumbnail Design",
+      "subcategory": "Social Media",
+      "images": [
+        "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200"
+      ],
+      "video": "",
+      "thumbnail": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800",
+      "tags": [
+        "Thumbnail",
+        "YouTube",
+        "CTR",
+        "Graphics",
+        "Photoshop",
+        "Social Media"
+      ],
+      "tools": [
+        "Photoshop",
+        "Lightroom"
+      ],
+      "camera": "",
+      "lens": "",
+      "editingSoftware": "Adobe Photoshop",
+      "year": 2026,
+      "location": "Online Creator Series",
+      "featured": false,
+      "published": true,
+      "views": 0,
+      "beforeImage": "",
+      "afterImage": "",
+      "createdAt": "2026-02-22T16:00:00Z",
+      "updatedAt": "2026-02-22T16:00:00Z"
+    },
+    {
+      "id": "proj-7",
+      "title": "Varanasi Ghats 4K Cinema Reel",
+      "slug": "varanasi-ghats-4k-cinema-reel",
+      "description": "A 60-second atmospheric 4K film reel capturing the golden evening Ganga Aarti, incense smoke, and rhythmic boat movements on the Ganges.",
+      "category": "Video Editing",
+      "subcategory": "Short Film",
+      "images": [
+        "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=1200"
+      ],
+      "video": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+      "thumbnail": "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=800",
+      "tags": [
+        "Video",
+        "Varanasi",
+        "Reels",
+        "Cinematic",
+        "Premiere Pro",
+        "Ghats",
+        "India"
+      ],
+      "tools": [
+        "Sony FX3",
+        "24-70mm GM",
+        "Premiere Pro",
+        "DaVinci Resolve"
+      ],
+      "camera": "Sony FX3",
+      "lens": "FE 24-70mm F2.8 GM II",
+      "editingSoftware": "Premiere Pro & DaVinci Resolve",
+      "year": 2026,
+      "location": "Varanasi, Uttar Pradesh",
+      "featured": true,
+      "published": true,
+      "views": 0,
+      "beforeImage": "",
+      "afterImage": "",
+      "createdAt": "2026-03-05T18:00:00Z",
+      "updatedAt": "2026-03-05T18:00:00Z"
+    },
+    {
+      "id": "proj-8",
+      "title": "Generative Light Fields â€” AI & Three.js Experiment",
+      "slug": "generative-light-fields-experiment",
+      "description": "An interactive creative code experiment combining WebGL shaders, particle velocity fields, and real-time GPU raymarching.",
+      "category": "Experiments",
+      "subcategory": "Creative Tech",
+      "images": [
+        "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200"
+      ],
+      "video": "",
+      "thumbnail": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800",
+      "tags": [
+        "Three.js",
+        "WebGL",
+        "Creative Coding",
+        "Shaders",
+        "Generative Art",
+        "AI"
+      ],
+      "tools": [
+        "Three.js",
+        "GLSL",
+        "React",
+        "GLSL Canvas"
+      ],
+      "camera": "",
+      "lens": "",
+      "editingSoftware": "VS Code & Three.js",
+      "year": 2026,
+      "location": "Web Experiment",
+      "featured": true,
+      "published": true,
+      "views": 0,
+      "beforeImage": "",
+      "afterImage": "",
+      "createdAt": "2026-03-18T10:00:00Z",
+      "updatedAt": "2026-03-18T10:00:00Z"
+    }
+  ],
+  "categories": [
+    {
+      "id": "cat-1",
+      "name": "Photography",
+      "slug": "photography",
+      "description": "Portraits, landscapes, architecture, street and experimental photography."
+    },
+    {
+      "id": "cat-2",
+      "name": "Digital Art",
+      "slug": "digital-art",
+      "description": "Digital illustrations, compositions and creative artwork."
+    },
+    {
+      "id": "cat-3",
+      "name": "Photo Editing",
+      "slug": "photo-editing",
+      "description": "Before/after editing projects, color grading, and retouching."
+    },
+    {
+      "id": "cat-4",
+      "name": "Poster Design",
+      "slug": "poster-design",
+      "description": "Creative poster and graphic design work."
+    },
+    {
+      "id": "cat-5",
+      "name": "Thumbnail Design",
+      "slug": "thumbnail-design",
+      "description": "YouTube and social media thumbnail designs."
+    },
+    {
+      "id": "cat-6",
+      "name": "Video Editing",
+      "slug": "video-editing",
+      "description": "Cinematic edits, reels and short-form videos."
+    },
+    {
+      "id": "cat-7",
+      "name": "Experiments",
+      "slug": "experiments",
+      "description": "Experimental creative and technology-based projects."
+    }
+  ],
+  "testimonials": [
+    {
+      "id": "test-1",
+      "name": "Ananya Roy",
+      "role": "Film Director & Producer",
+      "message": "FrameKatha brought an extraordinary cinematic vision to our documentary project. Their mastery over color grading and visual depth is world-class.",
+      "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200",
+      "rating": 5,
+      "active": true,
+      "createdAt": "2026-01-10T10:00:00Z"
+    },
+    {
+      "id": "test-2",
+      "name": "Vikramaditya Sengupta",
+      "role": "Creative Lead, Studio Pulse",
+      "message": "The before/after retouching and thumbnail designs delivered by FrameKatha boosted our channel CTR by over 35%. Exceptional artistic precision!",
+      "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200",
+      "rating": 5,
+      "active": true,
+      "createdAt": "2026-02-14T12:00:00Z"
+    }
+  ],
+  "messages": [],
+  "analytics": [
+    {
+      "id": "353f198e-a59d-4aea-82bd-b1980896f5e6",
+      "projectId": "proj-5",
+      "event": "view",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-28T16:13:57.582184Z"
+    },
+    {
+      "id": "1c65dd22-8d6d-4201-8865-2d03f904214a",
+      "projectId": "proj-1",
+      "event": "view",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-28T16:14:14.545171Z"
+    },
+    {
+      "id": "4e68c2e6-35f8-464d-ae68-78878ba2da9b",
+      "projectId": "proj-4",
+      "event": "view",
+      "ip": "182.70.10.5",
+      "timestamp": "2026-09-28T18:41:28.757200Z"
+    },
+    {
+      "id": "d3ed21e4-8764-4f46-937e-3385f315751b",
+      "projectId": "proj-acd06849",
+      "event": "view",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-28T19:07:50.686139Z"
+    },
+    {
+      "id": "b9b5e677-3b1c-4591-99c2-dadd3ddb1a1d",
+      "projectId": "proj-5",
+      "event": "view",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-28T19:17:53.707927Z"
+    },
+    {
+      "id": "8141089e-108a-432e-a83f-1e652e0e9038",
+      "projectId": "proj-3f35dc59",
+      "event": "view",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-28T19:27:46.787182Z"
+    },
+    {
+      "id": "418ff91d-b477-48b1-81fc-0e9f327424de",
+      "projectId": "proj-3f35dc59",
+      "event": "view",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-28T19:59:05.710774Z"
+    },
+    {
+      "id": "8a4c9a04-c29b-4569-8ef6-82507d646aac",
+      "projectId": "proj-3f35dc59",
+      "event": "view",
+      "ip": "2409:40c0:235:372b:f17a:40e9:573d:27e0",
+      "timestamp": "2026-09-29T19:31:44.677835Z"
+    },
+    {
+      "id": "ff7352f6-0718-46b8-87aa-9f74b99f976b",
+      "projectId": "proj-3f35dc59",
+      "event": "view",
+      "ip": "2409:40c0:235:372b:959f:4d26:fa00:7716",
+      "timestamp": "2026-09-29T19:33:44.489756Z"
+    }
+  ],
+  "client_galleries": [
+    {
+      "id": "cg-70e3a22c",
+      "clientName": "ffgerg",
+      "eventTitle": "dvc",
+      "slug": "dvss",
+      "passcode": "12345",
+      "eventDate": "dvdfv",
+      "location": "dfvsdfa",
+      "coverImage": "/uploads/4e3da8bceb7546af95b9ec84d9660f2d.jpg",
+      "images": [
+        "/uploads/90a165e013014c4a96de7f920c0177ee.jpeg",
+        "/uploads/3b885a7cb9b74eb5ae5d68feab2edfb0.jpeg",
+        "/uploads/4deb0fa2ca1b438a9f3b1f9069fb4115.jpeg",
+        "/uploads/01f52e1fea414cfc84991023cdd5325c.jpeg",
+        "/uploads/c3c9d369a0d345d5a651b6ed2f2f0f6c.jpeg",
+        "/uploads/7369197c465a441fabe212b74ec85b11.jpeg",
+        "/uploads/05596debf5e343ddb280fc2a3dd305d2.jpeg",
+        "/uploads/74511ec915f14069b83b6549864bc195.jpeg",
+        "/uploads/4fdd334b6f7b4f089da0d390572608c9.jpeg",
+        "/uploads/92db6e8f255b41ebb46a0eb621437efa.jpeg",
+        "/uploads/6aec46ea4c3c453ca01751526b692cc7.jpeg",
+        "/uploads/b0e26f7875784a6db2522d76850721f9.jpeg",
+        "/uploads/a5da802098124cc2afc53947434a1052.jpeg",
+        "/uploads/6e79f9951bf74869851abc966fd27659.jpeg",
+        "/uploads/0794e7d9da8241f69466de574d394f3e.jpeg",
+        "/uploads/af08aa1910c34d819cc625feef00bab7.jpeg",
+        "/uploads/65aa2d687bd641ca80e701a6b63e43eb.jpeg",
+        "/uploads/cc43f4ac3d3a41d68249542666ec879b.jpeg",
+        "/uploads/7be693cc8e824952a7dda54aea78ccb1.jpeg",
+        "/uploads/d941a7e06db241afb7e0ab27c76fd1f0.jpeg",
+        "/uploads/e0bac2d3232e4ea6b5ef0cf6af63d0ce.jpeg",
+        "/uploads/88511e6707954fe19040ca19c4080edb.jpeg",
+        "/uploads/b1f458d873854f53825690488449975b.jpeg",
+        "/uploads/7803e3cd68b14d13ae408ad6d4783326.jpeg",
+        "/uploads/597e7ccf87e6461893cbe648fe8b2fda.jpeg",
+        "/uploads/7a8580fb1c5c448a8d1f781e217496d5.jpeg",
+        "/uploads/7522eb2332e94d10ad9bd79ffb25a2b2.jpeg",
+        "/uploads/34bd0445ebf040d3a902369c7e0e161e.jpeg",
+        "/uploads/93201b2d2f1a4c97bba87c0c02e70ec6.jpeg",
+        "/uploads/26dcfdcb55334c3f9af277f7e5e7b849.jpeg",
+        "/uploads/5b7491b48b404266bf14c608d62ec5c0.jpeg",
+        "/uploads/2cb667ff00504a62854b752e52b8e5ad.jpeg",
+        "/uploads/81c6091d53cc4c6d8635482b7d516e9b.jpeg",
+        "/uploads/8836d792409b4313a049bb3a59d1d712.jpeg",
+        "/uploads/f63289c6f29d4d1c8ef1a026f1ba1928.jpeg",
+        "/uploads/a0b614a0dd01461b8cd8cf1fc4925dc7.jpeg",
+        "/uploads/3d4b6081c6df4744a3a92929d88325ab.jpeg",
+        "/uploads/afdf538457c24694865044813f923eef.jpeg",
+        "/uploads/0d171c8173554f779476fa928949faed.jpeg",
+        "/uploads/c028c3be89ca40bf8f7ae3a12a575d59.jpeg",
+        "/uploads/dc586939f0d242e587792279c312c692.jpeg",
+        "/uploads/36c0dff98abe41c2a603a121ea397a9e.jpeg",
+        "/uploads/ace0bcede7fe424d9ed772a09fc71d17.jpeg",
+        "/uploads/7fa8c3249af54d5aa87b2063927f5632.jpeg",
+        "/uploads/74b290dcc42f4462af646468a11ea5fc.jpeg",
+        "/uploads/a7b9a62ab7d644fcb7147f56706d1f89.jpeg",
+        "/uploads/6ab04d4943474a509d71f17fb7ce6741.jpeg",
+        "/uploads/c2d68bed9361410492c40486dbefc4f7.jpeg",
+        "/uploads/1f1de155ccb14692a3d6a7ac6ada6688.jpeg",
+        "/uploads/844506ffe6a2433d9a41fe47204461a3.jpeg",
+        "/uploads/38a7cd1e1e6b46a89636ebe97218a816.jpeg",
+        "/uploads/53659b186b5b4f8b89f59e780f733733.jpeg",
+        "/uploads/32f4aef16b5b4440beb5bf7ee1a75348.jpeg",
+        "/uploads/651645a45a5645f29190981936a22ca8.jpeg",
+        "/uploads/f9a64adbf1b84f158bdff78745c65ffc.jpeg",
+        "/uploads/a2f22af2923446a1b34eef61a7050d87.jpeg",
+        "/uploads/92221ff303864949a165583a0779d055.jpeg",
+        "/uploads/99736b2cfc3e41d0adec87eae9e02ac1.jpeg"
+      ],
+      "instructions": "Please review the photos and tap the heart icon on your favorite shots for album selection.",
+      "allowDownload": true,
+      "watermarkEnabled": true,
+      "deadline": "",
+      "selectedImages": [],
+      "clientNotes": "",
+      "isFinalized": false,
+      "views": 2,
+      "createdAt": "2026-09-29T21:11:31.534331Z",
+      "updatedAt": "2026-09-29T21:11:59.772284Z"
+    },
+    {
+      "id": "cg-aa59c8db",
+      "clientName": "PARAS AWARE",
+      "eventTitle": "fwfwfwf",
+      "slug": "1111",
+      "passcode": "12345",
+      "eventDate": "30 Sep 2026",
+      "location": "ssssss",
+      "coverImage": "",
+      "images": [],
+      "instructions": "Please review the photos and tap the heart icon on your favorite shots for album selection.",
+      "allowDownload": true,
+      "watermarkEnabled": true,
+      "deadline": "",
+      "selectedImages": [],
+      "clientNotes": "",
+      "isFinalized": false,
+      "views": 0,
+      "createdAt": "2026-09-29T20:59:33.665208Z",
+      "updatedAt": "2026-09-29T20:59:33.665218Z"
+    },
+    {
+      "id": "cg-88519c94",
+      "clientName": "Rohit & Priya Sharma",
+      "eventTitle": "Royal Palace Wedding Photoshoot",
+      "slug": "rohit-priya-wedding",
+      "passcode": "1234",
+      "eventDate": "28 Sep 2026",
+      "location": "Udaipur City Palace",
+      "coverImage": "https://images.unsplash.com/photo-1519741497674-611481863552?w=1200",
+      "images": [
+        "https://images.unsplash.com/photo-1519741497674-611481863552?w=1200",
+        "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=1200",
+        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=1200",
+        "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=1200"
+      ],
+      "instructions": "Please review your wedding shoot photos and tap the heart icon on your favorite shots for album selection.",
+      "allowDownload": true,
+      "watermarkEnabled": false,
+      "deadline": "",
+      "selectedImages": [],
+      "clientNotes": "",
+      "isFinalized": false,
+      "views": 2,
+      "createdAt": "2026-09-29T20:23:47.736513Z",
+      "updatedAt": "2026-09-29T20:23:47.736527Z"
+    }
+  ],
+  "settings": {
+    "title": "FrameKatha",
+    "tagline": "Every Frame Tells a Story.",
+    "aboutText": "FrameKatha is a professional creative portfolio platform showcasing photography, digital art, color grading, poster design, and visual filmmaking.",
+    "socialLinks": {
+      "instagram": "https://instagram.com/framekatha",
+      "github": "https://github.com/framekatha",
+      "linkedin": "https://linkedin.com/in/framekatha",
+      "youtube": "https://youtube.com/@framekatha",
+      "email": "parasaware05@gmail.com"
+    },
+    "maintenanceMode": false,
+    "maintenanceMessage": "We're sprinkling some magic on FrameKatha ✨\nWe'll be back shortly — thank you for your patience! 🚀",
+    "showcaseVideo": "/videos/reel-1.mp4",
+    "showcaseVideoTitle": "Cinematic Visual Showreel",
+    "showcaseVideoSubtitle": "4K 60FPS Video Production, Visual Effects & Color Grading",
+    "showcaseVideoEnabled": true,
+    "showcaseVideos": [
+      {
+        "id": "vid-1",
+        "url": "/videos/reel-1.mp4",
+        "title": "Cinematic Motion & Urban Flow",
+        "subtitle": "4K Street cinematography with natural depth of field and motion tracking",
+        "tag": "Motion Cinema"
+      },
+      {
+        "id": "vid-2",
+        "url": "/videos/reel-2.mp4",
+        "title": "Documentary Portrait & Atmosphere",
+        "subtitle": "High-contrast dynamic range capture with natural light transitions",
+        "tag": "Documentary"
+      },
+      {
+        "id": "vid-3",
+        "url": "/videos/reel-3.mp4",
+        "title": "Studio Headshot & Facial Optics",
+        "subtitle": "Commercial portrait cinematography with clean studio lighting",
+        "tag": "Studio Optics"
+      },
+      {
+        "id": "vid-4",
+        "url": "/videos/flower.mp4",
+        "title": "Macro Color & Nature Motion",
+        "subtitle": "Ultra-vibrant saturation profile with high framerate slow motion",
+        "tag": "Macro Nature"
+      }
+    ]
+  }
+}

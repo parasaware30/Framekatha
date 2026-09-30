@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: framekatha-studio
+    env: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: CREATOR_EMAIL
+        value: parasaware05@gmail.com

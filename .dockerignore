@@ -1,0 +1,10 @@
+node_modules
+.git
+.gemini
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.env.local
+.DS_Store
+dist
