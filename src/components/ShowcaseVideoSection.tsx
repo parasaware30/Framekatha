@@ -292,6 +292,13 @@ export function ShowcaseVideoSection({
             muted={isMuted}
             playsInline
             preload="auto"
+            onEnded={() => {
+              const v = videoRef.current;
+              if (v) {
+                v.currentTime = 0;
+                v.play().catch(() => {});
+              }
+            }}
             className="w-full h-full object-cover"
           />
 

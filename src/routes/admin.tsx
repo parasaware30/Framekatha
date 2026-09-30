@@ -435,11 +435,60 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const [savingSettings, setSavingSettings] = useState(false);
   const [settingsSavedSuccess, setSettingsSavedSuccess] = useState(false);
 
-  // New Video Reel addition state in settings
+  // Video Reel addition and editing state in settings
   const [newVideoUrl, setNewVideoUrl] = useState("");
   const [newVideoTitle, setNewVideoTitle] = useState("");
   const [newVideoSubtitle, setNewVideoSubtitle] = useState("");
   const [newVideoTag, setNewVideoTag] = useState("");
+
+  const [editingVideoIndex, setEditingVideoIndex] = useState<number | null>(null);
+  const [editingVideoForm, setEditingVideoForm] = useState<{
+    id: string;
+    url: string;
+    title: string;
+    subtitle: string;
+    tag: string;
+  } | null>(null);
+
+  const handleStartEditVideo = (index: number) => {
+    const v = (settingsForm.showcaseVideos || [])[index];
+    if (!v) return;
+    setEditingVideoIndex(index);
+    setEditingVideoForm({
+      id: v.id || "vid-" + index,
+      url: v.url || "",
+      title: v.title || "",
+      subtitle: v.subtitle || "",
+      tag: v.tag || ""
+    });
+  };
+
+  const handleSaveEditedVideo = () => {
+    if (editingVideoIndex === null || !editingVideoForm) return;
+    if (!editingVideoForm.url.trim()) {
+      alert("Please enter a Video URL or upload a video file.");
+      return;
+    }
+    const updatedList = [...(settingsForm.showcaseVideos || [])];
+    updatedList[editingVideoIndex] = {
+      ...updatedList[editingVideoIndex],
+      url: editingVideoForm.url.trim(),
+      title: editingVideoForm.title.trim() || "Cinematic Video",
+      subtitle: editingVideoForm.subtitle.trim() || "4K Production",
+      tag: editingVideoForm.tag.trim() || "Showreel"
+    };
+    setSettingsForm((prev) => ({
+      ...prev,
+      showcaseVideos: updatedList
+    }));
+    setEditingVideoIndex(null);
+    setEditingVideoForm(null);
+  };
+
+  const handleCancelEditVideo = () => {
+    setEditingVideoIndex(null);
+    setEditingVideoForm(null);
+  };
 
   const handleAddVideoToReel = () => {
     if (!newVideoUrl.trim()) {
@@ -469,6 +518,10 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
       ...prev,
       showcaseVideos: (prev.showcaseVideos || []).filter((_, i) => i !== index)
     }));
+    if (editingVideoIndex === index) {
+      setEditingVideoIndex(null);
+      setEditingVideoForm(null);
+    }
   };
 
   const handleMoveVideoReel = (index: number, direction: -1 | 1) => {
@@ -479,6 +532,10 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     list[index] = list[targetIndex];
     list[targetIndex] = temp;
     setSettingsForm((prev) => ({ ...prev, showcaseVideos: list }));
+    if (editingVideoIndex !== null) {
+      setEditingVideoIndex(null);
+      setEditingVideoForm(null);
+    }
   };
 
   const handleAddPresetVideoToReel = (preset: { url: string; title: string; subtitle: string; tag: string }) => {
@@ -3054,70 +3111,189 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                   </span>
                 </div>
 
-                <div className="space-y-2.5">
-                  {(settingsForm.showcaseVideos || []).map((v: any, idx: number) => (
-                    <div
-                      key={v.id || idx}
-                      className="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:border-purple-500/40 transition-all"
-                    >
-                      <div className="flex items-center gap-3 w-full sm:w-auto">
-                        <div className="relative size-14 rounded-xl overflow-hidden bg-black shrink-0 border border-white/10">
-                          <video
-                            src={v.url}
-                            muted
-                            playsInline
-                            className="size-full object-cover"
-                          />
-                          <span className="absolute bottom-0.5 right-0.5 px-1 py-0.2 rounded bg-black/80 text-[8px] font-mono text-cyan-300">
-                            #{idx + 1}
-                          </span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold border border-purple-500/30">
-                              {v.tag || "Cinematic"}
-                            </span>
-                            <span className="text-xs font-bold text-white truncate">
-                              {v.title || "Untitled Video"}
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-slate-400 truncate mt-0.5">
-                            {v.subtitle || v.url}
-                          </p>
-                        </div>
-                      </div>
+                <div className="space-y-3">
+                  {(settingsForm.showcaseVideos || []).map((v: any, idx: number) => {
+                    const isEditing = editingVideoIndex === idx;
+                    return (
+                      <div
+                        key={v.id || idx}
+                        className={`p-4 rounded-2xl border transition-all ${
+                          isEditing
+                            ? "bg-purple-950/30 border-purple-500 shadow-[0_0_25px_rgba(168,85,247,0.2)]"
+                            : "bg-white/5 border-white/10 hover:border-purple-500/40"
+                        }`}
+                      >
+                        {isEditing && editingVideoForm ? (
+                          /* Inline Edit Form */
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
+                                <Edit className="size-3.5" />
+                                <span>Editing Video Reel #{idx + 1}</span>
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={handleSaveEditedVideo}
+                                  className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1 cursor-pointer transition-all shadow-md"
+                                >
+                                  <Save className="size-3.5" />
+                                  <span>Update Reel</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={handleCancelEditVideo}
+                                  className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-all"
+                                >
+                                  <X className="size-3.5" />
+                                  <span>Cancel</span>
+                                </button>
+                              </div>
+                            </div>
 
-                      {/* Controls: Reorder & Delete */}
-                      <div className="flex items-center gap-1.5 self-end sm:self-center">
-                        <button
-                          type="button"
-                          disabled={idx === 0}
-                          onClick={() => handleMoveVideoReel(idx, -1)}
-                          className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                          title="Move Up"
-                        >
-                          <ArrowUp className="size-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          disabled={idx === (settingsForm.showcaseVideos || []).length - 1}
-                          onClick={() => handleMoveVideoReel(idx, 1)}
-                          className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                          title="Move Down"
-                        >
-                          <ArrowDown className="size-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveVideoFromReel(idx)}
-                          className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 transition-all"
-                          title="Delete Video"
-                        >
-                          <Trash2 className="size-3.5" />
-                        </button>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                              <div className="sm:col-span-2 flex flex-col sm:flex-row gap-2">
+                                <input
+                                  type="text"
+                                  placeholder="Video URL (.mp4/.webm)..."
+                                  value={editingVideoForm.url}
+                                  onChange={(e) =>
+                                    setEditingVideoForm({
+                                      ...editingVideoForm,
+                                      url: e.target.value
+                                    })
+                                  }
+                                  className="flex-1 px-3.5 py-2 rounded-xl bg-black/50 border border-purple-500/50 text-white text-xs focus:border-cyan-400 focus:outline-none font-mono"
+                                />
+                                <FileUploadPicker
+                                  label="Change Video"
+                                  value={editingVideoForm.url}
+                                  onChange={(url) =>
+                                    setEditingVideoForm({
+                                      ...editingVideoForm,
+                                      url: url
+                                    })
+                                  }
+                                  accept="video/*"
+                                  isVideo={true}
+                                />
+                              </div>
+                              <div>
+                                <input
+                                  type="text"
+                                  placeholder="Tag / Category (e.g. Drone Landscape)"
+                                  value={editingVideoForm.tag}
+                                  onChange={(e) =>
+                                    setEditingVideoForm({
+                                      ...editingVideoForm,
+                                      tag: e.target.value
+                                    })
+                                  }
+                                  className="w-full px-3.5 py-2 rounded-xl bg-black/50 border border-purple-500/50 text-white text-xs focus:border-cyan-400 focus:outline-none"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <input
+                                type="text"
+                                placeholder="Video Title"
+                                value={editingVideoForm.title}
+                                onChange={(e) =>
+                                    setEditingVideoForm({
+                                      ...editingVideoForm,
+                                      title: e.target.value
+                                    })
+                                }
+                                className="w-full px-3.5 py-2 rounded-xl bg-black/50 border border-purple-500/50 text-white text-xs focus:border-cyan-400 focus:outline-none"
+                              />
+                              <input
+                                type="text"
+                                placeholder="Video Subtitle / Story Description"
+                                value={editingVideoForm.subtitle}
+                                onChange={(e) =>
+                                    setEditingVideoForm({
+                                      ...editingVideoForm,
+                                      subtitle: e.target.value
+                                    })
+                                }
+                                className="w-full px-3.5 py-2 rounded-xl bg-black/50 border border-purple-500/50 text-white text-xs focus:border-cyan-400 focus:outline-none"
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          /* View Video Row */
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                            <div className="flex items-center gap-3 w-full sm:w-auto">
+                              <div className="relative size-14 rounded-xl overflow-hidden bg-black shrink-0 border border-white/10">
+                                <video
+                                  src={v.url}
+                                  muted
+                                  playsInline
+                                  className="size-full object-cover"
+                                />
+                                <span className="absolute bottom-0.5 right-0.5 px-1 py-0.2 rounded bg-black/80 text-[8px] font-mono text-cyan-300">
+                                  #{idx + 1}
+                                </span>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span className="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold border border-purple-500/30">
+                                    {v.tag || "Cinematic"}
+                                  </span>
+                                  <span className="text-xs font-bold text-white truncate">
+                                    {v.title || "Untitled Video"}
+                                  </span>
+                                </div>
+                                <p className="text-[11px] text-slate-400 truncate mt-0.5">
+                                  {v.subtitle || v.url}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Controls: Edit, Reorder, Delete */}
+                            <div className="flex items-center gap-1.5 self-end sm:self-center">
+                              <button
+                                type="button"
+                                onClick={() => handleStartEditVideo(idx)}
+                                className="px-2.5 py-1.5 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer"
+                                title="Edit this Video Reel"
+                              >
+                                <Edit className="size-3.5 text-purple-300" />
+                                <span>Edit</span>
+                              </button>
+                              <button
+                                type="button"
+                                disabled={idx === 0}
+                                onClick={() => handleMoveVideoReel(idx, -1)}
+                                className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                                title="Move Up"
+                              >
+                                <ArrowUp className="size-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                disabled={idx === (settingsForm.showcaseVideos || []).length - 1}
+                                onClick={() => handleMoveVideoReel(idx, 1)}
+                                className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                                title="Move Down"
+                              >
+                                <ArrowDown className="size-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveVideoFromReel(idx)}
+                                className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 transition-all cursor-pointer"
+                                title="Delete Video"
+                              >
+                                <Trash2 className="size-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
 
                   {(settingsForm.showcaseVideos || []).length === 0 && (
                     <div className="py-6 text-center text-slate-400 text-xs bg-white/5 rounded-2xl border border-dashed border-white/10">
@@ -3129,7 +3305,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
 
               {/* ➕ Add New Video to Reel Card */}
               <div className="p-4 sm:p-5 rounded-2xl bg-black/40 border border-purple-500/30 space-y-3.5">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <h4 className="text-xs font-bold text-cyan-300 uppercase tracking-wider flex items-center gap-1.5">
                     <Plus className="size-3.5" />
                     <span>Add New Video Reel:</span>
@@ -3142,13 +3318,13 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                       type="button"
                       onClick={() =>
                         handleAddPresetVideoToReel({
-                          url: "https://assets.mixkit.co/videos/preview/mixkit-cinematic-night-aerial-of-city-streets-41865-large.mp4",
+                          url: "/videos/reel-1.mp4",
                           title: "Neon City Nocturne 4K",
-                          subtitle: "Night aerial cinematography with anamorphic lens flares",
+                          subtitle: "Night aerial cinematography with natural depth of field",
                           tag: "Night Aerial"
                         })
                       }
-                      className="text-[10px] px-2 py-0.5 rounded-lg bg-white/5 hover:bg-purple-500/20 text-purple-300 border border-white/10"
+                      className="text-[10px] px-2 py-0.5 rounded-lg bg-white/5 hover:bg-purple-500/20 text-purple-300 border border-white/10 cursor-pointer"
                     >
                       🌃 City Night
                     </button>
@@ -3156,13 +3332,13 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                       type="button"
                       onClick={() =>
                         handleAddPresetVideoToReel({
-                          url: "https://assets.mixkit.co/videos/preview/mixkit-cinematic-view-of-mountains-and-a-valley-41584-large.mp4",
+                          url: "/videos/reel-2.mp4",
                           title: "Himalayan Ridge Drone Reel",
-                          subtitle: "High-altitude landscape exploration & dynamic lighting",
+                          subtitle: "High-altitude landscape exploration & dynamic light",
                           tag: "Drone Landscape"
                         })
                       }
-                      className="text-[10px] px-2 py-0.5 rounded-lg bg-white/5 hover:bg-cyan-500/20 text-cyan-300 border border-white/10"
+                      className="text-[10px] px-2 py-0.5 rounded-lg bg-white/5 hover:bg-cyan-500/20 text-cyan-300 border border-white/10 cursor-pointer"
                     >
                       🏔️ Mountain Drone
                     </button>
@@ -3170,13 +3346,13 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                       type="button"
                       onClick={() =>
                         handleAddPresetVideoToReel({
-                          url: "https://assets.mixkit.co/videos/preview/mixkit-fashion-model-posing-in-neon-light-41585-large.mp4",
+                          url: "/videos/reel-3.mp4",
                           title: "Cyberpunk Portrait Studio",
                           subtitle: "Editorial fashion lighting with RGB color contrast",
                           tag: "Editorial Fashion"
                         })
                       }
-                      className="text-[10px] px-2 py-0.5 rounded-lg bg-white/5 hover:bg-pink-500/20 text-pink-300 border border-white/10"
+                      className="text-[10px] px-2 py-0.5 rounded-lg bg-white/5 hover:bg-pink-500/20 text-pink-300 border border-white/10 cursor-pointer"
                     >
                       💃 Neon Fashion
                     </button>
@@ -3184,15 +3360,15 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                       type="button"
                       onClick={() =>
                         handleAddPresetVideoToReel({
-                          url: "https://assets.mixkit.co/videos/preview/mixkit-hands-holding-a-camera-with-a-lens-41586-large.mp4",
-                          title: "Cinematic Studio & Lens Craft",
-                          subtitle: "Commercial equipment and precision optics",
-                          tag: "Studio Lens"
+                          url: "/videos/flower.mp4",
+                          title: "Macro Color & Nature Motion",
+                          subtitle: "Ultra-vibrant saturation profile with high framerate slow motion",
+                          tag: "Macro Nature"
                         })
                       }
-                      className="text-[10px] px-2 py-0.5 rounded-lg bg-white/5 hover:bg-amber-500/20 text-amber-300 border border-white/10"
+                      className="text-[10px] px-2 py-0.5 rounded-lg bg-white/5 hover:bg-amber-500/20 text-amber-300 border border-white/10 cursor-pointer"
                     >
-                      📷 Studio Optics
+                      🌸 Macro Nature
                     </button>
                   </div>
                 </div>
