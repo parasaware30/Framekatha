@@ -10,10 +10,11 @@ export function cleanMediaUrl(url: any): string {
 
 export function cleanProjectData(project: any): any {
   if (!project) return project;
+  const rawThumb = cleanMediaUrl(project.thumbnail) || (Array.isArray(project.images) && project.images[0] ? cleanMediaUrl(project.images[0]) : "");
   return {
     ...project,
-    thumbnail: cleanMediaUrl(project.thumbnail),
-    folderThumbnail: cleanMediaUrl(project.folderThumbnail),
+    thumbnail: rawThumb || "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800",
+    folderThumbnail: cleanMediaUrl(project.folderThumbnail) || rawThumb || "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800",
     beforeImage: cleanMediaUrl(project.beforeImage),
     afterImage: cleanMediaUrl(project.afterImage),
     video: cleanMediaUrl(project.video),
@@ -362,7 +363,11 @@ function getLocalStore<T>(key: string, defaultVal: T): T {
   try {
     const item = localStorage.getItem(`fk_store_${key}`);
     if (!item) return defaultVal;
-    const parsed = JSON.parse(item);
+    let parsed = JSON.parse(item);
+    if (key === 'projects' && Array.isArray(parsed)) {
+      // Remove any test / incomplete project like 'Cinematic Visual Story'
+      parsed = parsed.filter((p: any) => !(p.title === "Cinematic Visual Story" && (p.location === "ccsd" || !p.thumbnail || p.thumbnail.includes("Cinematic"))));
+    }
     if (Array.isArray(defaultVal) && defaultVal.length > 0 && Array.isArray(parsed) && parsed.length === 0) {
       return defaultVal;
     }

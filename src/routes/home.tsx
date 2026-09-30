@@ -215,10 +215,13 @@ export function HomePage() {
               >
                 <div className="aspect-4/3 overflow-hidden bg-slate-900 relative">
                   <img
-                    src={p.thumbnail}
+                    src={p.thumbnail || "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800"}
                     alt={p.title}
                     loading="lazy"
                     decoding="async"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800";
+                    }}
                     className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
                   />
                   <div className="absolute top-3 left-3 right-3 flex justify-between items-center gap-2">
