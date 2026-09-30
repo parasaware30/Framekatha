@@ -357,21 +357,44 @@ export const DEFAULT_CLIENT_GALLERIES: any[] = [
   }
 ];
 
-// ── LOCALSTORAGE HELPERS ───────────────────────────────────────────────────
+// ── PERSISTENT DELETION BLACKLIST & LOCALSTORAGE HELPERS ────────────────────
+
+function getDeletedSet(key: string): Set<string> {
+  try {
+    const raw = localStorage.getItem(`fk_deleted_${key}`);
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+function markAsDeleted(key: string, idOrSlug: string): void {
+  try {
+    const s = getDeletedSet(key);
+    s.add(idOrSlug);
+    localStorage.setItem(`fk_deleted_${key}`, JSON.stringify(Array.from(s)));
+  } catch {
+    // ignore
+  }
+}
 
 function getLocalStore<T>(key: string, defaultVal: T): T {
   try {
+    const deletedSet = getDeletedSet(key);
     const item = localStorage.getItem(`fk_store_${key}`);
-    if (!item) return defaultVal;
-    let parsed = JSON.parse(item);
-    if (key === 'projects' && Array.isArray(parsed)) {
-      // Remove any test / incomplete project like 'Cinematic Visual Story'
-      parsed = parsed.filter((p: any) => !(p.title === "Cinematic Visual Story" && (p.location === "ccsd" || !p.thumbnail || p.thumbnail.includes("Cinematic"))));
+    let list: any = item ? JSON.parse(item) : defaultVal;
+
+    if (Array.isArray(list)) {
+      list = list.filter((x: any) => {
+        if (!x) return false;
+        if (x.id && deletedSet.has(x.id)) return false;
+        if (x.slug && deletedSet.has(x.slug)) return false;
+        if (key === 'projects' && x.title === "Cinematic Visual Story" && (x.location === "ccsd" || !x.thumbnail || x.thumbnail.includes("Cinematic"))) return false;
+        return true;
+      });
     }
-    if (Array.isArray(defaultVal) && defaultVal.length > 0 && Array.isArray(parsed) && parsed.length === 0) {
-      return defaultVal;
-    }
-    return parsed;
+
+    return list as T;
   } catch {
     return defaultVal;
   }
@@ -395,6 +418,7 @@ export async function fetchProjects(params?: {
   search?: string;
   sort_by?: string;
 }) {
+  const deletedSet = getDeletedSet('projects');
   try {
     const query = new URLSearchParams();
     if (params?.category && params.category !== 'All') query.append('category', params.category);
@@ -406,9 +430,14 @@ export async function fetchProjects(params?: {
 
     const res = await fetch(`${API_BASE_URL}/projects?${query.toString()}`);
     if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        return data.map(cleanProjectData);
+      const ct = res.headers.get('content-type') || '';
+      if (ct.includes('application/json')) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          return data
+            .filter((p: any) => !deletedSet.has(p.id) && !deletedSet.has(p.slug))
+            .map(cleanProjectData);
+        }
       }
     }
   } catch {
@@ -435,11 +464,19 @@ export async function fetchProjects(params?: {
 }
 
 export async function fetchAllProjectsCMS() {
+  const deletedSet = getDeletedSet('projects');
   try {
     const res = await fetch(`${API_BASE_URL}/projects/all-cms`);
     if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data)) return data.map(cleanProjectData);
+      const ct = res.headers.get('content-type') || '';
+      if (ct.includes('application/json')) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          return data
+            .filter((p: any) => !deletedSet.has(p.id) && !deletedSet.has(p.slug))
+            .map(cleanProjectData);
+        }
+      }
     }
   } catch {
     // fallback
@@ -593,22 +630,32 @@ export async function updateProject(id: string, data: any) {
 }
 
 export async function deleteProject(id: string) {
+  markAsDeleted('projects', id);
   try {
     await fetch(`${API_BASE_URL}/projects/${id}`, { method: 'DELETE' });
   } catch {
     // fallback
   }
   const all = getLocalStore('projects', DEFAULT_PROJECTS);
-  setLocalStore('projects', all.filter((p: any) => p.id !== id));
+  setLocalStore('projects', all.filter((p: any) => p.id !== id && p.slug !== id));
   return { success: true };
 }
 
 // ── CATEGORIES ─────────────────────────────────────────────────────────────
 
 export async function fetchCategories() {
+  const deletedSet = getDeletedSet('categories');
   try {
     const res = await fetch(`${API_BASE_URL}/categories`);
-    if (res.ok) return res.json();
+    if (res.ok) {
+      const ct = res.headers.get('content-type') || '';
+      if (ct.includes('application/json')) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          return data.filter((c: any) => !deletedSet.has(c.id) && !deletedSet.has(c.slug));
+        }
+      }
+    }
   } catch {
     // fallback
   }
@@ -655,22 +702,32 @@ export async function updateCategory(id: string, data: any) {
 }
 
 export async function deleteCategory(id: string) {
+  markAsDeleted('categories', id);
   try {
     await fetch(`${API_BASE_URL}/categories/${id}`, { method: 'DELETE' });
   } catch {
     // fallback
   }
   const all = getLocalStore('categories', DEFAULT_CATEGORIES);
-  setLocalStore('categories', all.filter((c: any) => c.id !== id));
+  setLocalStore('categories', all.filter((c: any) => c.id !== id && c.slug !== id));
   return { success: true };
 }
 
 // ── TESTIMONIALS ───────────────────────────────────────────────────────────
 
 export async function fetchTestimonials() {
+  const deletedSet = getDeletedSet('testimonials');
   try {
     const res = await fetch(`${API_BASE_URL}/testimonials`);
-    if (res.ok) return res.json();
+    if (res.ok) {
+      const ct = res.headers.get('content-type') || '';
+      if (ct.includes('application/json')) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          return data.filter((t: any) => !deletedSet.has(t.id));
+        }
+      }
+    }
   } catch {
     // fallback
   }
@@ -696,6 +753,7 @@ export async function createTestimonial(data: any) {
 }
 
 export async function deleteTestimonial(id: string) {
+  markAsDeleted('testimonials', id);
   try {
     await fetch(`${API_BASE_URL}/testimonials/${id}`, { method: 'DELETE' });
   } catch {
@@ -1043,13 +1101,14 @@ export async function updateClientGallery(id: string, data: any): Promise<any> {
 }
 
 export async function deleteClientGallery(id: string): Promise<any> {
+  markAsDeleted('client_galleries', id);
   try {
     await fetch(`${API_BASE_URL}/client-galleries/${id}`, { method: 'DELETE' });
   } catch {
     // fallback
   }
   const all = getLocalStore('client_galleries', DEFAULT_CLIENT_GALLERIES);
-  setLocalStore('client_galleries', all.filter((g: any) => g.id !== id));
+  setLocalStore('client_galleries', all.filter((g: any) => g.id !== id && g.slug !== id));
   return { success: true };
 }
 
