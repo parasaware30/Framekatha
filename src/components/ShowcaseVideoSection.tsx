@@ -29,6 +29,19 @@ interface ShowcaseVideoSectionProps {
   enabled?: boolean;
 }
 
+function sanitizeVideoUrl(url?: string, index: number = 0): string {
+  if (!url || url.includes("mixkit.co") || url.includes("localhost")) {
+    const fallbackReels = [
+      "/videos/reel-1.mp4",
+      "/videos/reel-2.mp4",
+      "/videos/reel-3.mp4",
+      "/videos/flower.mp4"
+    ];
+    return fallbackReels[index % fallbackReels.length];
+  }
+  return url;
+}
+
 export function ShowcaseVideoSection({
   videoUrl,
   videos,
@@ -36,8 +49,8 @@ export function ShowcaseVideoSection({
   subtitle = "4K 60FPS Video Production, Visual Effects & Color Grading",
   enabled = true
 }: ShowcaseVideoSectionProps) {
-  // Normalize video list
-  const videoList: ShowcaseVideoItem[] = (videos && videos.length > 0)
+  // Normalize video list with local high-performance video assets
+  const rawList: ShowcaseVideoItem[] = (videos && videos.length > 0)
     ? videos.filter(v => v && v.url)
     : videoUrl
     ? [
@@ -52,26 +65,38 @@ export function ShowcaseVideoSection({
     : [
         {
           id: "vid-1",
-          url: "https://assets.mixkit.co/videos/preview/mixkit-cinematic-night-aerial-of-city-streets-41865-large.mp4",
+          url: "/videos/reel-1.mp4",
           title: "Neon City Nocturne 4K",
-          subtitle: "Night aerial cinematography with anamorphic lens flares",
+          subtitle: "Night aerial cinematography with natural depth of field",
           tag: "Night Aerial"
         },
         {
           id: "vid-2",
-          url: "https://assets.mixkit.co/videos/preview/mixkit-cinematic-view-of-mountains-and-a-valley-41584-large.mp4",
+          url: "/videos/reel-2.mp4",
           title: "Himalayan Ridge Drone Reel",
           subtitle: "High-altitude landscape exploration & dynamic natural light",
           tag: "Drone Landscape"
         },
         {
           id: "vid-3",
-          url: "https://assets.mixkit.co/videos/preview/mixkit-fashion-model-posing-in-neon-light-41585-large.mp4",
+          url: "/videos/reel-3.mp4",
           title: "Cyberpunk Portrait Studio",
           subtitle: "Editorial fashion lighting with RGB color contrast",
           tag: "Editorial Fashion"
+        },
+        {
+          id: "vid-4",
+          url: "/videos/flower.mp4",
+          title: "Macro Color & Nature Motion",
+          subtitle: "Ultra-vibrant saturation profile with high framerate slow motion",
+          tag: "Macro Nature"
         }
       ];
+
+  const videoList: ShowcaseVideoItem[] = rawList.map((v, idx) => ({
+    ...v,
+    url: sanitizeVideoUrl(v.url, idx)
+  }));
 
   if (!enabled || videoList.length === 0) return null;
 
@@ -85,13 +110,16 @@ export function ShowcaseVideoSection({
   const [isMuted, setIsMuted] = useState(true);
   const [isInView, setIsInView] = useState(false);
 
-  // Safe play helper function
+  // Safe auto-play function supporting iOS Safari & Chrome autoplay policies
   const startPlaying = useCallback(() => {
     const video = videoRef.current;
     if (!video) return;
     video.muted = true;
     video.defaultMuted = true;
     video.playsInline = true;
+    video.setAttribute("muted", "");
+    video.setAttribute("playsinline", "");
+    video.setAttribute("webkit-playsinline", "true");
     
     const playPromise = video.play();
     if (playPromise !== undefined) {
@@ -100,13 +128,13 @@ export function ShowcaseVideoSection({
           setIsPlaying(true);
         })
         .catch(() => {
-          // Autoplay was blocked pending gesture; will play on first user scroll/touch
+          // Autoplay deferred until user interacts with viewport
           setIsPlaying(false);
         });
     }
   }, []);
 
-  // IntersectionObserver: Auto-play when scrolled into view, pause when scrolled away
+  // IntersectionObserver: Auto-play immediately when scrolled into view
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -126,41 +154,58 @@ export function ShowcaseVideoSection({
           }
         });
       },
-      { threshold: 0.25 }
+      { threshold: [0, 0.1, 0.25, 0.5], rootMargin: "100px 0px" }
     );
 
     observer.observe(container);
     return () => observer.disconnect();
   }, [startPlaying, activeIndex]);
 
-  // Fallback: On first user scroll or touch gesture, immediately trigger play if currently in view
+  // Window scroll & touch listener for instantaneous autoplay on all phones / browsers
   useEffect(() => {
-    const handleFirstGesture = () => {
-      if (isInView && videoRef.current && videoRef.current.paused) {
-        startPlaying();
+    const handleScrollCheck = () => {
+      const container = containerRef.current;
+      const video = videoRef.current;
+      if (!container || !video) return;
+      const rect = container.getBoundingClientRect();
+      const inViewport = rect.top < window.innerHeight && rect.bottom > 0;
+      if (inViewport) {
+        setIsInView(true);
+        if (video.paused) {
+          startPlaying();
+        }
+      } else {
+        setIsInView(false);
+        if (!video.paused) {
+          video.pause();
+          setIsPlaying(false);
+        }
       }
     };
 
-    window.addEventListener("scroll", handleFirstGesture, { passive: true });
-    window.addEventListener("touchstart", handleFirstGesture, { passive: true });
-    window.addEventListener("click", handleFirstGesture, { passive: true });
+    window.addEventListener("scroll", handleScrollCheck, { passive: true });
+    window.addEventListener("touchmove", handleScrollCheck, { passive: true });
+    window.addEventListener("pointerdown", handleScrollCheck, { passive: true });
+    window.addEventListener("click", handleScrollCheck, { passive: true });
+
+    // Initial check on mount
+    handleScrollCheck();
 
     return () => {
-      window.removeEventListener("scroll", handleFirstGesture);
-      window.removeEventListener("touchstart", handleFirstGesture);
-      window.removeEventListener("click", handleFirstGesture);
+      window.removeEventListener("scroll", handleScrollCheck);
+      window.removeEventListener("touchmove", handleScrollCheck);
+      window.removeEventListener("pointerdown", handleScrollCheck);
+      window.removeEventListener("click", handleScrollCheck);
     };
-  }, [isInView, startPlaying]);
+  }, [startPlaying]);
 
   // Auto-play new video when index changes
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.currentTime = 0;
-      if (isInView) {
-        startPlaying();
-      }
+      startPlaying();
     }
-  }, [activeIndex, isInView, startPlaying]);
+  }, [activeIndex, startPlaying]);
 
   const togglePlay = () => {
     const video = videoRef.current;

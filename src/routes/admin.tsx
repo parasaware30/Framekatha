@@ -397,31 +397,38 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     },
     maintenanceMode: false,
     maintenanceMessage: "We're sprinkling some magic on FrameKatha ✨\nOur team is working hard to bring you an even better experience.\nWe'll be back shortly — thank you for your patience! 🚀",
-    showcaseVideo: "https://assets.mixkit.co/videos/preview/mixkit-cinematic-night-aerial-of-city-streets-41865-large.mp4",
+    showcaseVideo: "/videos/reel-1.mp4",
     showcaseVideoTitle: "Cinematic Visual Showreel",
     showcaseVideoSubtitle: "4K 60FPS Video Production, Visual Effects & Color Grading",
     showcaseVideoEnabled: true,
     showcaseVideos: [
       {
         id: "vid-1",
-        url: "https://assets.mixkit.co/videos/preview/mixkit-cinematic-night-aerial-of-city-streets-41865-large.mp4",
+        url: "/videos/reel-1.mp4",
         title: "Neon City Nocturne 4K",
-        subtitle: "Night aerial cinematography with anamorphic lens flares",
+        subtitle: "Night aerial cinematography with natural depth of field",
         tag: "Night Aerial"
       },
       {
         id: "vid-2",
-        url: "https://assets.mixkit.co/videos/preview/mixkit-cinematic-view-of-mountains-and-a-valley-41584-large.mp4",
+        url: "/videos/reel-2.mp4",
         title: "Himalayan Ridge Drone Reel",
         subtitle: "High-altitude landscape exploration & dynamic natural light",
         tag: "Drone Landscape"
       },
       {
         id: "vid-3",
-        url: "https://assets.mixkit.co/videos/preview/mixkit-fashion-model-posing-in-neon-light-41585-large.mp4",
+        url: "/videos/reel-3.mp4",
         title: "Cyberpunk Portrait Studio",
         subtitle: "Editorial fashion lighting with RGB color contrast",
         tag: "Editorial Fashion"
+      },
+      {
+        id: "vid-4",
+        url: "/videos/flower.mp4",
+        title: "Macro Color & Nature Motion",
+        subtitle: "Ultra-vibrant saturation profile with high framerate slow motion",
+        tag: "Macro Nature"
       }
     ] as any[]
   });
@@ -538,31 +545,38 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           },
           maintenanceMode: settData.maintenanceMode ?? false,
           maintenanceMessage: settData.maintenanceMessage || "We're sprinkling some magic on FrameKatha ✨\nOur team is working hard to bring you an even better experience.\nWe'll be back shortly — thank you for your patience! 🚀",
-          showcaseVideo: settData.showcaseVideo ?? "https://assets.mixkit.co/videos/preview/mixkit-cinematic-night-aerial-of-city-streets-41865-large.mp4",
+          showcaseVideo: settData.showcaseVideo ?? "/videos/reel-1.mp4",
           showcaseVideoTitle: settData.showcaseVideoTitle || "Cinematic Visual Showreel",
           showcaseVideoSubtitle: settData.showcaseVideoSubtitle || "4K 60FPS Video Production, Visual Effects & Color Grading",
           showcaseVideoEnabled: settData.showcaseVideoEnabled !== false,
           showcaseVideos: settData.showcaseVideos && settData.showcaseVideos.length > 0 ? settData.showcaseVideos : [
             {
               id: "vid-1",
-              url: "https://assets.mixkit.co/videos/preview/mixkit-cinematic-night-aerial-of-city-streets-41865-large.mp4",
+              url: "/videos/reel-1.mp4",
               title: "Neon City Nocturne 4K",
-              subtitle: "Night aerial cinematography with anamorphic lens flares",
+              subtitle: "Night aerial cinematography with natural depth of field",
               tag: "Night Aerial"
             },
             {
               id: "vid-2",
-              url: "https://assets.mixkit.co/videos/preview/mixkit-cinematic-view-of-mountains-and-a-valley-41584-large.mp4",
+              url: "/videos/reel-2.mp4",
               title: "Himalayan Ridge Drone Reel",
               subtitle: "High-altitude landscape exploration & dynamic natural light",
               tag: "Drone Landscape"
             },
             {
               id: "vid-3",
-              url: "https://assets.mixkit.co/videos/preview/mixkit-fashion-model-posing-in-neon-light-41585-large.mp4",
+              url: "/videos/reel-3.mp4",
               title: "Cyberpunk Portrait Studio",
               subtitle: "Editorial fashion lighting with RGB color contrast",
               tag: "Editorial Fashion"
+            },
+            {
+              id: "vid-4",
+              url: "/videos/flower.mp4",
+              title: "Macro Color & Nature Motion",
+              subtitle: "Ultra-vibrant saturation profile with high framerate slow motion",
+              tag: "Macro Nature"
             }
           ]
         });
