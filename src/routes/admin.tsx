@@ -12,6 +12,7 @@ import {
   deleteProject,
   fetchCategories,
   createCategory,
+  updateCategory,
   deleteCategory,
   fetchTestimonials,
   createTestimonial,
@@ -370,9 +371,12 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     published: true,
   });
 
-  // New Category Form
+  // Category Form & Edit States
   const [newCatName, setNewCatName] = useState("");
   const [newCatDesc, setNewCatDesc] = useState("");
+  const [editingCatId, setEditingCatId] = useState<string | null>(null);
+  const [editCatName, setEditCatName] = useState("");
+  const [editCatDesc, setEditCatDesc] = useState("");
 
   // New Testimonial Form
   const [newTestName, setNewTestName] = useState("");
@@ -753,23 +757,61 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   };
 
   const handleDeleteProject = async (id: string) => {
-    if (confirm("Are you sure you want to delete this project?")) {
+    // 1. Instant optimistic deletion from UI
+    setProjects((prev) => prev.filter((p) => p.id !== id));
+    try {
       await deleteProject(id);
-      loadCMSData();
+    } catch (err) {
+      console.error("Failed to delete project:", err);
     }
   };
 
   const handleAddCategory = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newCatName) return;
-    await createCategory({
-      name: newCatName,
-      slug: newCatName.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-      description: newCatDesc
-    });
-    setNewCatName("");
-    setNewCatDesc("");
-    loadCMSData();
+    if (!newCatName.trim()) return;
+    try {
+      const newCat = await createCategory({
+        name: newCatName.trim(),
+        slug: newCatName.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+        description: newCatDesc.trim()
+      });
+      setCategories((prev) => [...prev, newCat]);
+      setNewCatName("");
+      setNewCatDesc("");
+    } catch (err) {
+      console.error("Failed to add category:", err);
+    }
+  };
+
+  const handleStartEditCategory = (cat: any) => {
+    setEditingCatId(cat.id);
+    setEditCatName(cat.name || "");
+    setEditCatDesc(cat.description || "");
+  };
+
+  const handleSaveCategoryEdit = async (id: string) => {
+    if (!editCatName.trim()) return;
+    const updated = {
+      name: editCatName.trim(),
+      slug: editCatName.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+      description: editCatDesc.trim()
+    };
+    setCategories((prev) => prev.map((c) => (c.id === id ? { ...c, ...updated } : c)));
+    setEditingCatId(null);
+    try {
+      await updateCategory(id, updated);
+    } catch (err) {
+      console.error("Failed to update category:", err);
+    }
+  };
+
+  const handleDeleteCategory = async (id: string) => {
+    setCategories((prev) => prev.filter((c) => c.id !== id));
+    try {
+      await deleteCategory(id);
+    } catch (err) {
+      console.error("Failed to delete category:", err);
+    }
   };
 
   const handleAddTestimonial = async (e: React.FormEvent) => {
@@ -2493,37 +2535,123 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
         {/* TAB 3: CATEGORIES */}
         {activeTab === "categories" && (
           <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
-            <form onSubmit={handleAddCategory} className="glass-strong rounded-3xl p-4 sm:p-6 border border-white/10 flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <input
-                required
-                type="text"
-                placeholder="New Category Name (e.g. Concept Design)"
-                value={newCatName}
-                onChange={(e) => setNewCatName(e.target.value)}
-                className="flex-1 w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-xs focus:border-cyan-400 focus:outline-none"
-              />
-              <input
-                type="text"
-                placeholder="Description (Optional)"
-                value={newCatDesc}
-                onChange={(e) => setNewCatDesc(e.target.value)}
-                className="flex-1 w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-xs focus:border-cyan-400 focus:outline-none"
-              />
-              <button type="submit" className="btn-neon text-xs px-5 py-2.5 w-full sm:w-auto shrink-0 shadow-md">
-                + Add Category
-              </button>
+            <div className="flex flex-wrap justify-between items-center gap-4">
+              <div>
+                <h2 className="text-xl font-bold font-display text-white flex items-center gap-2">
+                  <Layers className="size-6 text-purple-400" />
+                  Portfolio Categories ({categories.length})
+                </h2>
+                <p className="text-xs text-slate-300">Add, rename, edit descriptions, or remove portfolio categories</p>
+              </div>
+            </div>
+
+            {/* Add New Category Form */}
+            <form onSubmit={handleAddCategory} className="glass-strong rounded-3xl p-4 sm:p-6 border border-purple-500/30 shadow-lg space-y-3">
+              <span className="text-xs font-bold text-purple-300 flex items-center gap-1.5">
+                <Plus className="size-4" /> Create New Category
+              </span>
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <input
+                  required
+                  type="text"
+                  placeholder="New Category Name (e.g. Street Photography)"
+                  value={newCatName}
+                  onChange={(e) => setNewCatName(e.target.value)}
+                  className="flex-1 w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-purple-500/40 text-white text-xs focus:border-cyan-400 focus:outline-none placeholder:text-slate-500"
+                />
+                <input
+                  type="text"
+                  placeholder="Description / Tagline (Optional)"
+                  value={newCatDesc}
+                  onChange={(e) => setNewCatDesc(e.target.value)}
+                  className="flex-1 w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:border-cyan-400 focus:outline-none placeholder:text-slate-500"
+                />
+                <button type="submit" className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-white font-bold text-xs shadow-md transition-all cursor-pointer shrink-0 flex items-center justify-center gap-2">
+                  <Plus className="size-4" /> Add Category
+                </button>
+              </div>
             </form>
 
+            {/* Categories List Cards with Edit / Delete */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {categories.map((c) => (
-                <div key={c.id} className="glass-strong rounded-2xl p-4 border border-white/10 flex justify-between items-center">
-                  <div>
-                    <h4 className="font-bold text-white text-sm">{c.name}</h4>
-                    <p className="text-xs text-slate-400">{c.description}</p>
-                  </div>
-                  <button onClick={() => deleteCategory(c.id).then(loadCMSData)} className="p-1.5 text-red-400 hover:text-red-300">
-                    <Trash2 className="size-4" />
-                  </button>
+                <div key={c.id || c.name} className="glass-strong rounded-2xl p-4 border border-white/10 hover:border-purple-500/30 transition-all space-y-3">
+                  {editingCatId === c.id ? (
+                    /* Inline Edit Mode */
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/30">
+                          Editing Category
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setEditingCatId(null)}
+                          className="text-slate-400 hover:text-white text-xs"
+                        >
+                          <X className="size-4" />
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        value={editCatName}
+                        onChange={(e) => setEditCatName(e.target.value)}
+                        placeholder="Category Name"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-cyan-400 text-white text-xs focus:outline-none font-bold"
+                      />
+                      <input
+                        type="text"
+                        value={editCatDesc}
+                        onChange={(e) => setEditCatDesc(e.target.value)}
+                        placeholder="Category Description"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/20 text-slate-200 text-xs focus:outline-none"
+                      />
+                      <div className="flex items-center gap-2 justify-end pt-1">
+                        <button
+                          type="button"
+                          onClick={() => setEditingCatId(null)}
+                          className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleSaveCategoryEdit(c.id)}
+                          className="px-4 py-1.5 rounded-lg bg-gradient-to-r from-purple-600 to-cyan-500 text-white text-xs font-bold shadow-sm flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <Check className="size-3.5" /> Save Changes
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    /* Normal Display Mode */
+                    <div className="flex justify-between items-center gap-3">
+                      <div className="space-y-1 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="size-2 rounded-full bg-purple-400" />
+                          <h4 className="font-bold text-white text-sm">{c.name}</h4>
+                        </div>
+                        <p className="text-xs text-slate-400 pl-4">{c.description || "Portfolio category"}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => handleStartEditCategory(c)}
+                          className="p-2 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/30 transition-all cursor-pointer shadow-sm"
+                          title="Edit Category Name & Description"
+                        >
+                          <Edit className="size-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteCategory(c.id)}
+                          className="p-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30 transition-all cursor-pointer"
+                          title="Delete Category"
+                        >
+                          <Trash2 className="size-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

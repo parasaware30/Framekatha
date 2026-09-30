@@ -628,6 +628,27 @@ export async function createCategory(data: any) {
   return newCat;
 }
 
+export async function updateCategory(id: string, data: any) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/categories/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (res.ok) return res.json();
+  } catch {
+    // fallback
+  }
+  const all = getLocalStore('categories', DEFAULT_CATEGORIES);
+  const idx = all.findIndex((c: any) => c.id === id);
+  if (idx !== -1) {
+    all[idx] = { ...all[idx], ...data };
+    setLocalStore('categories', all);
+    return all[idx];
+  }
+  return data;
+}
+
 export async function deleteCategory(id: string) {
   try {
     await fetch(`${API_BASE_URL}/categories/${id}`, { method: 'DELETE' });
