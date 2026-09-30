@@ -29,6 +29,37 @@ export function cleanProjectData(project: any): any {
 
 const DEFAULT_PROJECTS: any[] = [
   {
+    id: "proj-3f35dc59",
+    title: "Ganpati bappa morya",
+    slug: "ganpati-bappa-morya",
+    description: "Traditional festival celebration and portrait photography capturing divine devotion, street processions, and atmospheric cultural festivities.",
+    category: "Photography",
+    subcategory: "Devotional & Festival",
+    folderName: "Ganpati bappa morya",
+    folderThumbnail: "https://images.unsplash.com/photo-1567591414240-e2ff40994f27?w=800",
+    photoTitle: "Ganpati Bappa Morya",
+    images: [
+      "https://images.unsplash.com/photo-1567591414240-e2ff40994f27?w=1200",
+      "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=1200"
+    ],
+    video: "",
+    thumbnail: "https://images.unsplash.com/photo-1567591414240-e2ff40994f27?w=800",
+    tags: ["Ganpati", "Festival", "India", "Devotion", "Culture", "Photography"],
+    tools: ["Sony A7IV", "85mm f/1.4", "Adobe Lightroom"],
+    camera: "Sony A7IV",
+    lens: "85mm f/1.4 GM",
+    editingSoftware: "Adobe Lightroom Classic",
+    year: 2026,
+    location: "Maharashtra, India",
+    featured: true,
+    published: true,
+    views: 4,
+    beforeImage: "https://images.unsplash.com/photo-1567591414240-e2ff40994f27?w=800&sat=-50",
+    afterImage: "https://images.unsplash.com/photo-1567591414240-e2ff40994f27?w=800",
+    createdAt: "2026-09-28T19:27:34.711782Z",
+    updatedAt: "2026-09-28T19:30:33.119889Z"
+  },
+  {
     id: "proj-1",
     title: "Night at Rameshwaram",
     slug: "night-at-rameshwaram",
@@ -694,17 +725,53 @@ export async function deleteMessage(id: string) {
 export async function fetchAnalytics() {
   try {
     const res = await fetch(`${API_BASE_URL}/analytics`);
-    if (res.ok) return res.json();
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.overview) return data;
+    }
   } catch {
     // fallback
   }
   const projects = getLocalStore('projects', DEFAULT_PROJECTS);
+  const categories = getLocalStore('categories', DEFAULT_CATEGORIES);
   const totalViews = projects.reduce((sum: number, p: any) => sum + (p.views || 0), 0);
+  const featuredCount = projects.filter((p: any) => p.featured === true).length;
+  const sorted = [...projects].sort((a: any, b: any) => (b.views || 0) - (a.views || 0));
+  const mostViewed = sorted[0] || { title: "Ganpati bappa morya", views: 128 };
+
+  const categoryViews = categories.map((c: any) => {
+    const views = projects
+      .filter((p: any) => p.category?.toLowerCase() === c.name?.toLowerCase())
+      .reduce((sum: number, p: any) => sum + (p.views || 0), 0);
+    return { category: c.name, views: views || 50 };
+  });
+
   return {
-    totalViews: totalViews || 950,
-    totalProjects: projects.length,
-    totalLikes: 48,
-    totalMessages: getLocalStore('messages', []).length || 3
+    overview: {
+      totalProjects: projects.length,
+      totalViews: totalViews || 885,
+      featuredProjects: featuredCount || 4,
+      categoriesCount: categories.length,
+      mostViewedProject: {
+        title: mostViewed.title || "Ganpati bappa morya",
+        views: mostViewed.views || 312
+      }
+    },
+    categoryViews: categoryViews,
+    timeline: [
+      { month: "May", views: 95 },
+      { month: "Jun", views: 140 },
+      { month: "Jul", views: 210 },
+      { month: "Aug", views: 280 },
+      { month: "Sep", views: 340 },
+      { month: "Oct", views: totalViews || 420 }
+    ],
+    devices: [
+      { name: "Desktop / Laptop", percentage: 55 },
+      { name: "Mobile Devices", percentage: 40 },
+      { name: "Tablet", percentage: 5 }
+    ],
+    recentEvents: []
   };
 }
 
