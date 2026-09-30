@@ -55,10 +55,22 @@ export function QRCodeModal({
   const websiteHomeUrl = `${origin}/`;
   const portfolioUrl = `${origin}/portfolio`;
 
-  // Default to project URL if available, else website home
   const [activeTab, setActiveTab] = useState<"project" | "website" | "portfolio">(
     projectUrl ? "project" : "website"
   );
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [copied, setCopied] = useState<boolean>(false);
   const [generating, setGenerating] = useState<boolean>(false);
@@ -281,7 +293,7 @@ export function QRCodeModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-4 animate-fade-in select-none"
+      className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-xl flex items-center justify-center p-4 animate-fade-in select-none"
       onClick={onClose}
     >
       <div

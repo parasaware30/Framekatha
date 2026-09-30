@@ -2475,11 +2475,17 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
 
             {/* 5. MODAL: VIEW CLIENT'S SELECTED PHOTOS & NOTES */}
             {selectedFeedbackGallery && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
-                <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto glass-strong rounded-3xl p-6 sm:p-8 border border-pink-500/40 shadow-2xl space-y-6 relative">
+              <div
+                className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in"
+                onClick={() => setSelectedFeedbackGallery(null)}
+              >
+                <div
+                  className="w-full max-w-3xl max-h-[90vh] overflow-y-auto glass-strong rounded-3xl p-6 sm:p-8 border border-pink-500/40 shadow-2xl space-y-6 relative"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <button
                     onClick={() => setSelectedFeedbackGallery(null)}
-                    className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white"
+                    className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white cursor-pointer"
                   >
                     <X className="size-5" />
                   </button>
