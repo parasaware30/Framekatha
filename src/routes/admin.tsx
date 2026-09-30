@@ -26,7 +26,12 @@ import {
   createClientGallery,
   updateClientGallery,
   deleteClientGallery,
-  cleanMediaUrl
+  cleanMediaUrl,
+  DEFAULT_PROJECTS,
+  DEFAULT_CATEGORIES,
+  DEFAULT_TESTIMONIALS,
+  DEFAULT_SETTINGS,
+  DEFAULT_CLIENT_GALLERIES
 } from "@/lib/api";
 import {
   BarChart3,
@@ -506,11 +511,11 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
         fetchClientGalleries()
       ]);
       setAnalytics(anData);
-      setProjects(projData);
-      setCategories(catData);
-      setTestimonials(testData);
-      setMessages(msgData);
-      setClientGalleries(clientData || []);
+      setProjects(projData && projData.length > 0 ? projData : DEFAULT_PROJECTS);
+      setCategories(catData && catData.length > 0 ? catData : DEFAULT_CATEGORIES);
+      setTestimonials(testData && testData.length > 0 ? testData : DEFAULT_TESTIMONIALS);
+      setMessages(msgData || []);
+      setClientGalleries(clientData && clientData.length > 0 ? clientData : DEFAULT_CLIENT_GALLERIES);
       if (settData) {
         setSiteSettings(settData);
         setSettingsForm({

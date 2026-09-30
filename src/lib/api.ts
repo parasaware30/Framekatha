@@ -27,7 +27,7 @@ export function cleanProjectData(project: any): any {
 
 // ── EMBEDDED SEED DATABASE (Fallback when backend is offline) ───────────────
 
-const DEFAULT_PROJECTS: any[] = [
+export const DEFAULT_PROJECTS: any[] = [
   {
     id: "proj-3f35dc59",
     title: "Ganpati bappa morya",
@@ -225,7 +225,7 @@ const DEFAULT_PROJECTS: any[] = [
   }
 ];
 
-const DEFAULT_CATEGORIES: any[] = [
+export const DEFAULT_CATEGORIES: any[] = [
   { id: "cat-1", name: "Photography", slug: "photography", count: 2 },
   { id: "cat-2", name: "Photo Editing", slug: "photo-editing", count: 1 },
   { id: "cat-3", name: "Digital Art", slug: "digital-art", count: 1 },
@@ -233,7 +233,7 @@ const DEFAULT_CATEGORIES: any[] = [
   { id: "cat-5", name: "Thumbnail Design", slug: "thumbnail-design", count: 1 }
 ];
 
-const DEFAULT_TESTIMONIALS: any[] = [
+export const DEFAULT_TESTIMONIALS: any[] = [
   {
     id: "test-1",
     clientName: "Aarav Mehta",
@@ -256,7 +256,7 @@ const DEFAULT_TESTIMONIALS: any[] = [
   }
 ];
 
-const DEFAULT_SETTINGS: any = {
+export const DEFAULT_SETTINGS: any = {
   title: "FrameKatha",
   tagline: "Every Frame Tells a Story.",
   aboutText: "FrameKatha is a professional creative portfolio platform showcasing photography, digital art, color grading, poster design, and visual filmmaking created by Paras Aware.",
@@ -305,7 +305,7 @@ const DEFAULT_SETTINGS: any = {
   ]
 };
 
-const DEFAULT_CLIENT_GALLERIES: any[] = [
+export const DEFAULT_CLIENT_GALLERIES: any[] = [
   {
     id: "cg-88519c94",
     clientName: "Rohit & Priya Sharma",
@@ -361,7 +361,12 @@ const DEFAULT_CLIENT_GALLERIES: any[] = [
 function getLocalStore<T>(key: string, defaultVal: T): T {
   try {
     const item = localStorage.getItem(`fk_store_${key}`);
-    return item ? JSON.parse(item) : defaultVal;
+    if (!item) return defaultVal;
+    const parsed = JSON.parse(item);
+    if (Array.isArray(defaultVal) && defaultVal.length > 0 && Array.isArray(parsed) && parsed.length === 0) {
+      return defaultVal;
+    }
+    return parsed;
   } catch {
     return defaultVal;
   }
